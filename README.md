@@ -1,12 +1,12 @@
 # TemporalAssessment
 Assess Temporal Effects on Machine Learning Models, especially on LLMs
 
-#DataSets
+# DataSets
 
 ## Classification 
 
 ### Amazon Review
-Link:https://nijianmo.github.io/amazon/
+Link: https://nijianmo.github.io/amazon/
 
 We downloaded reviews of Health and Personal Care, Digital Music, Video Games.
 
