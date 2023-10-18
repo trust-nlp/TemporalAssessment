@@ -24,6 +24,16 @@ Download:
 wget https://gmb.let.rug.nl/releases/gmb-2.2.0.zip
 ```
 
+### WIESP
+
+Link: https://huggingface.co/datasets/adsabs/WIESP2022-NER
+
+Download:
+```python
+from datasets import load_dataset
+dataset = load_dataset("adsabs/WIESP2022-NER")
+```
+
 ## QA Datasets
 ### Amazon QA
 Link: https://cseweb.ucsd.edu/~jmcauley/datasets/amazon/qa/
