@@ -43,12 +43,10 @@ We downloaded reviews of Health and Personal Care, Video Games.
 ### PubMed QA
 Link: https://github.com/pubmedqa/pubmedqa
 
-Download PQA-A and PQA-U : 
-
 ```bash
-wget https://drive.google.com/open?id=15v1x6aQDlZymaHGP7cZJZZYFfeJt2NdS
+wget wget https://github.com/pubmedqa/pubmedqa/blob/master/data/ori_pqal.json
 ```
 
 ```
-wget https://drive.google.com/open?id=1RsGLINVce-0GsDkCLDuLZmoLuzfmoCuQ
+wget https://github.com/pubmedqa/pubmedqa/blob/master/data/test_ground_truth.json
 ```
