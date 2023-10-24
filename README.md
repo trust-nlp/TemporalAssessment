@@ -41,12 +41,10 @@ Link: https://cseweb.ucsd.edu/~jmcauley/datasets/amazon/qa/
 We downloaded reviews of Health and Personal Care, Video Games. 
 
 ### PubMed QA
-Link: https://github.com/pubmedqa/pubmedqa
+Link: [https://github.com/pubmedqa/pubmedqa](https://archive.org/details/bionlp-2022-all-data)
 
 ```bash
-wget wget https://github.com/pubmedqa/pubmedqa/blob/master/data/ori_pqal.json
+wget https://archive.org/download/bionlp-2022-all-data/BIONLP_2022_all_data.zip
+unzip BIONLP_2022_all_data.zip
 ```
 
-```
-wget https://github.com/pubmedqa/pubmedqa/blob/master/data/test_ground_truth.json
-```
