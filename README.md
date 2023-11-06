@@ -34,6 +34,12 @@ from datasets import load_dataset
 dataset = load_dataset("adsabs/WIESP2022-NER")
 ```
 
+Download ner-tags and id dictionary file:
+
+```bash
+wget https://huggingface.co/datasets/adsabs/WIESP2022-NER/resolve/main/ner_tags.json
+```
+
 ## QA Datasets
 ### Amazon QA
 Link: https://cseweb.ucsd.edu/~jmcauley/datasets/amazon/qa/
