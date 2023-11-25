@@ -162,3 +162,11 @@ cython_debug/
 # self defined by Xiaolei
 **/.DS_Store
 /resources/*
+
+# no logs
+logs/
+
+#no data
+
+*.csv
+*.json
