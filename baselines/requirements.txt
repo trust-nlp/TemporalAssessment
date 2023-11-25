@@ -1,0 +1,15 @@
+torch>=1.9.0
+transformers>=4.35.0
+tqdm>=4.61.1
+scikit-learn>=0.24.1
+scipy>=1.6.3
+sentencepiece != 0.1.92
+seqeval
+numpy>=1.20.1
+datasets>=1.18.1
+nltk>=3.5
+protobuf
+evaluate
+accelerate >= 0.12.0
+
+
