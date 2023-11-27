@@ -3,7 +3,7 @@ import json
 import os
 from dateutil.parser import parse
 from datetime import datetime
-from dataproc import preprocess
+from ..dataproc import preprocess
 from tqdm import tqdm
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -65,12 +65,10 @@ hcdf.text = hcdf.text.apply(lambda x: ' '.join(x))
 df_2007_2010 = hcdf[hcdf['year'].isin([2007, 2010])]
 df_2011_2012 = hcdf[hcdf['year'].isin([2011, 2012])]
 df_2013_2014 = hcdf[hcdf['year'].isin([2013, 2014])]
+df_all_year= hcdf[hcdf['year'].isin([2007, 2014])]
 
 min_size = min(len(df_2007_2010), len(df_2011_2012), len(df_2013_2014))
 
-df_2007_2010_sampled = df_2007_2010.sample(n=min_size, random_state=seed)
-df_2011_2012_sampled = df_2011_2012.sample(n=min_size, random_state=seed)
-df_2013_2014_sampled = df_2013_2014.sample(n=min_size, random_state=seed)
 
 def split_and_save_datasets(df,period,seed,folder_path):
     # split train, validation and test datasets by ratio 0.6 0.2 0.2
@@ -85,7 +83,7 @@ def split_and_save_datasets(df,period,seed,folder_path):
     test.to_json(os.path.join(folder_path, test_filename), orient='records', lines=True)
 
 
-for seed in range(1, 6):  # 循环5个 seed 值
+for seed in range(1, 6):  # randomly split 5 times
     folder_path ='/home/weisi/Temporal/data/Amazon/HealthCare/seed{}/'.format(seed)
 
     if not os.path.exists(folder_path):
@@ -94,10 +92,11 @@ for seed in range(1, 6):  # 循环5个 seed 值
     df_2007_2010_sampled = df_2007_2010.sample(n=min_size, random_state=seed)
     df_2011_2012_sampled = df_2011_2012.sample(n=min_size, random_state=seed)
     df_2013_2014_sampled = df_2013_2014.sample(n=min_size, random_state=seed)
-
-    split_and_save_datasets(df_2007_2010_sampled, 'amzHC_T1_2008-2010',seed,folder_path)
-    split_and_save_datasets(df_2011_2012_sampled, 'amzHC_T2_2011-2013',seed,folder_path)
-    split_and_save_datasets(df_2013_2014_sampled, 'amzHC_T3_2014-2016',seed,folder_path)
+    all_year_sampled = df_all_year.sample(n=min_size, random_state=seed)
+    split_and_save_datasets(df_2007_2010_sampled, 'amzHC_T1_2007-2010',seed,folder_path)
+    split_and_save_datasets(df_2011_2012_sampled, 'amzHC_T2_2011-2012',seed,folder_path)
+    split_and_save_datasets(df_2013_2014_sampled, 'amzHC_T3_2013-2014',seed,folder_path)
+    split_and_save_datasets(all_year_sampled, 'amzHC_AY_2007-2014',seed,folder_path)
 
 
 
