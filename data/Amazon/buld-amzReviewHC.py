@@ -47,9 +47,8 @@ hcdf['sentiment'] = hcdf['overall'].apply(assign_sentiment)
 
 
 # rename keys if you wish. (model may need to specify text_column_name and label_column_name if it's not the same as the defalt: text/sentence/label...)
-
+# rename overall as label may cause error when running the model(if you want to use sentiment as label, the model automaticly remane it to label but it already exist)
 hcdf = hcdf.rename(columns={
-    "overall": "label",
     "reviewText": "text",
     "reviewTime": "time"
 })
