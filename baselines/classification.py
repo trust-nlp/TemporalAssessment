@@ -657,10 +657,10 @@ def main():
                 )
             else:
                 #metric = evaluate.combine("f1","accuracy","precision","recall")
-                f1_metric = evaluate.load("f1",config_name="multilabel")
-                accuracy_metric = evaluate.load("accuracy",config_name="multilabel")
-                precision_metric = evaluate.load("precision",config_name="multilabel")
-                recall_metric = evaluate.load("recall",config_name="multilabel")
+                f1_metric = evaluate.load("f1")
+                accuracy_metric = evaluate.load("accuracy")
+                precision_metric = evaluate.load("precision")
+                recall_metric = evaluate.load("recall")
                 logger.info("Using F1, accuracy, precision, recall as classification score, you can use --metric_name to overwrite.")
 
     def compute_metrics(p: EvalPrediction):
