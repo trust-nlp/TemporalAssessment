@@ -1,6 +1,6 @@
 GPU_NUMBER="0,1"
 MODEL_NAME='bert-base-uncased'  #bluebert 'bionlp/bluebert_pubmed_mimic_uncased_L-12_H-768_A-12' ; 'roberta-base'
-TASK='amzReviewHC'
+TASK='amzReviewHC_rating'
 BATCH_SIZE=32
 ACCUMULATION_STEPS=2
 SPLITSEED=1
