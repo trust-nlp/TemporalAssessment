@@ -11,7 +11,7 @@ BASE_PATH='/home/weisi/Temporal/data/Amazon/HealthCare'
 #T1-T1 T1-T2 T1-T3 T2-T2 T2-T3 T3-T3 AY-T3
 
 CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MODEL_NAME} --seed 42\
-    --output_dir logs/${TASK}/T1_T1/${MODEL_NAME}/seed_42_3e-5\
+    --output_dir logs/${TASK}/T1_T1/${MODEL_NAME}/split_seed${SPLITSEED}_model_seed_42_3e-5\
     --train_file "$BASE_PATH/seed$SPLITSEED/amzHC_T1_2007-2010_train.json"\
     --validation_file  "$BASE_PATH/seed$SPLITSEED/amzHC_T1_2007-2010_validation.json"\
     --test_file  "$BASE_PATH/seed$SPLITSEED/amzHC_T1_2007-2010_test.json"\
@@ -20,7 +20,7 @@ CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MOD
     --per_device_train_batch_size ${BATCH_SIZE} --per_device_eval_batch_size ${BATCH_SIZE} --gradient_accumulation_steps ${ACCUMULATION_STEPS} --eval_accumulation_steps ${ACCUMULATION_STEPS}
 
 CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MODEL_NAME} --seed 42\
-    --output_dir logs/${TASK}/T1_T2/${MODEL_NAME}/seed_42_3e-5\
+    --output_dir logs/${TASK}/T1_T2/${MODEL_NAME}/split_seed${SPLITSEED}_model_seed_42_3e-5\
     --train_file "$BASE_PATH/seed$SPLITSEED/amzHC_T1_2007-2010_train.json"\
     --validation_file  "$BASE_PATH/seed$SPLITSEED/amzHC_T1_2007-2010_validation.json"\
     --test_file  "$BASE_PATH/seed$SPLITSEED/amzHC_T2_2011-2012_test.json"\
@@ -29,7 +29,7 @@ CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MOD
     --per_device_train_batch_size ${BATCH_SIZE} --per_device_eval_batch_size ${BATCH_SIZE} --gradient_accumulation_steps ${ACCUMULATION_STEPS} --eval_accumulation_steps ${ACCUMULATION_STEPS}
 
 CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MODEL_NAME} --seed 42\
-    --output_dir logs/${TASK}/T1_T3/${MODEL_NAME}/seed_42_3e-5\
+    --output_dir logs/${TASK}/T1_T3/${MODEL_NAME}/split_seed${SPLITSEED}_model_seed_42_3e-5\
     --train_file "$BASE_PATH/seed$SPLITSEED/amzHC_T1_2007-2010_train.json"\
     --validation_file  "$BASE_PATH/seed$SPLITSEED/amzHC_T1_2007-2010_validation.json"\
     --test_file  "$BASE_PATH/seed$SPLITSEED/amzHC_T3_2013-2014_test.json"\
@@ -38,7 +38,7 @@ CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MOD
     --per_device_train_batch_size ${BATCH_SIZE} --per_device_eval_batch_size ${BATCH_SIZE} --gradient_accumulation_steps ${ACCUMULATION_STEPS} --eval_accumulation_steps ${ACCUMULATION_STEPS}
 
 CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MODEL_NAME} --seed 42\
-    --output_dir logs/${TASK}/T2_T2/${MODEL_NAME}/seed_42_3e-5\
+    --output_dir logs/${TASK}/T2_T2/${MODEL_NAME}/split_seed${SPLITSEED}_model_seed_42_3e-5\
     --train_file "$BASE_PATH/seed$SPLITSEED/amzHC_T2_2011-2012_train.json"\
     --validation_file  "$BASE_PATH/seed$SPLITSEED/amzHC_T2_2011-2012_validation.json"\
     --test_file  "$BASE_PATH/seed$SPLITSEED/amzHC_T2_2011-2012_test.json"\
@@ -47,7 +47,7 @@ CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MOD
     --per_device_train_batch_size ${BATCH_SIZE} --per_device_eval_batch_size ${BATCH_SIZE} --gradient_accumulation_steps ${ACCUMULATION_STEPS} --eval_accumulation_steps ${ACCUMULATION_STEPS}
 
 CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MODEL_NAME} --seed 42\
-    --output_dir logs/${TASK}/T2_T3/${MODEL_NAME}/seed_42_3e-5\
+    --output_dir logs/${TASK}/T2_T3/${MODEL_NAME}/split_seed${SPLITSEED}_model_seed_42_3e-5\
     --train_file "$BASE_PATH/seed$SPLITSEED/amzHC_T2_2011-2012_train.json"\
     --validation_file  "$BASE_PATH/seed$SPLITSEED/amzHC_T2_2011-2012_validation.json"\
     --test_file  "$BASE_PATH/seed$SPLITSEED/amzHC_T3_2013-2014_test.json"\
@@ -57,7 +57,7 @@ CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MOD
 
 
 CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MODEL_NAME} --seed 42\
-    --output_dir logs/${TASK}/T3_T3/${MODEL_NAME}/seed_42_3e-5\
+    --output_dir logs/${TASK}/T3_T3/${MODEL_NAME}/split_seed${SPLITSEED}_model_seed_42_3e-5\
     --train_file "$BASE_PATH/seed$SPLITSEED/amzHC_T3_2013-2014_train.json"\
     --validation_file  "$BASE_PATH/seed$SPLITSEED/amzHC_T3_2013-2014_validation.json"\
     --test_file  "$BASE_PATH/seed$SPLITSEED/amzHC_T3_2013-2014_test.json"\
@@ -66,7 +66,7 @@ CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MOD
     --per_device_train_batch_size ${BATCH_SIZE} --per_device_eval_batch_size ${BATCH_SIZE} --gradient_accumulation_steps ${ACCUMULATION_STEPS} --eval_accumulation_steps ${ACCUMULATION_STEPS}
 
 CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MODEL_NAME} --seed 42\
-    --output_dir logs/${TASK}/AY_T3/${MODEL_NAME}/seed_42_3e-5\
+    --output_dir logs/${TASK}/AY_T3/${MODEL_NAME}/split_seed${SPLITSEED}_model_seed_42_3e-5\
     --train_file "$BASE_PATH/seed$SPLITSEED/amzHC_AY_2007-2014_train.json"\
     --validation_file  "$BASE_PATH/seed$SPLITSEED/amzHC_AY_2007-2014_validation.json"\
     --test_file  "$BASE_PATH/seed$SPLITSEED/amzHC_T3_2013-2014_test.json"\
