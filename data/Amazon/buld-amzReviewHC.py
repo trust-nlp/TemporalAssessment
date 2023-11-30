@@ -84,7 +84,7 @@ def split_and_save_datasets(df,period,seed,folder_path):
 
 
 for seed in range(1, 6):  # randomly split 5 times
-    folder_path ='/home/weisi/Temporal/data/Amazon/HealthCare/seed{}/'.format(seed)
+    folder_path ='/home/weisi/TemporalAssessment/data/Amazon/HealthCare/seed{}/'.format(seed)
 
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
