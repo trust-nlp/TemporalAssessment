@@ -61,12 +61,13 @@ hcdf.text = hcdf.text.apply(lambda x: ' '.join(x))
 
 
 # devide dataset to 3 year periods
-df_2007_2010 = hcdf[hcdf['year'].isin([2007, 2010])]
+df_2007_2008 = hcdf[hcdf['year'].isin([2007, 2008])]
+df_2009_2010 = hcdf[hcdf['year'].isin([2009, 2010])]
 df_2011_2012 = hcdf[hcdf['year'].isin([2011, 2012])]
 df_2013_2014 = hcdf[hcdf['year'].isin([2013, 2014])]
 df_all_year= hcdf[hcdf['year'].isin([2007, 2014])]
 
-min_size = min(len(df_2007_2010), len(df_2011_2012), len(df_2013_2014))
+min_size = min(len(df_2007_2008), len(df_2009_2010),len(df_2011_2012), len(df_2013_2014))
 
 
 def split_and_save_datasets(df,period,seed,folder_path):
@@ -88,13 +89,15 @@ for seed in range(1, 6):  # randomly split 5 times
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
 
-    df_2007_2010_sampled = df_2007_2010.sample(n=min_size, random_state=seed)
+    df_2007_2008_sampled = df_2007_2008.sample(n=min_size, random_state=seed)
+    df_2009_2010_sampled = df_2009_2010.sample(n=min_size, random_state=seed)
     df_2011_2012_sampled = df_2011_2012.sample(n=min_size, random_state=seed)
     df_2013_2014_sampled = df_2013_2014.sample(n=min_size, random_state=seed)
     all_year_sampled = df_all_year.sample(n=min_size, random_state=seed)
-    split_and_save_datasets(df_2007_2010_sampled, 'amzHC_T1_2007-2010',seed,folder_path)
-    split_and_save_datasets(df_2011_2012_sampled, 'amzHC_T2_2011-2012',seed,folder_path)
-    split_and_save_datasets(df_2013_2014_sampled, 'amzHC_T3_2013-2014',seed,folder_path)
+    split_and_save_datasets(df_2007_2008_sampled, 'amzHC_T1_2007-2008',seed,folder_path)
+    split_and_save_datasets(df_2009_2010_sampled, 'amzHC_T2_2009-2010',seed,folder_path)
+    split_and_save_datasets(df_2011_2012_sampled, 'amzHC_T3_2011-2012',seed,folder_path)
+    split_and_save_datasets(df_2013_2014_sampled, 'amzHC_T4_2013-2014',seed,folder_path)
     split_and_save_datasets(all_year_sampled, 'amzHC_AY_2007-2014',seed,folder_path)
 
 
