@@ -67,7 +67,7 @@ CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MOD
 
 
 CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MODEL_NAME} --seed 42\
-    --output_dir logs/${TASK}/T2_T4/${MODEL_NAME}/split_seed${SPLITSEED}_model_seed_42_3e-5\
+    --output_dir logs/${TASK}/T2_T3/${MODEL_NAME}/split_seed${SPLITSEED}_model_seed_42_3e-5\
     --train_file "$BASE_PATH/seed$SPLITSEED/amzHC_T2_2009-2010_train.json"\
     --validation_file  "$BASE_PATH/seed$SPLITSEED/amzHC_T2_2009-2010_validation.json"\
     --test_file  "$BASE_PATH/seed$SPLITSEED/amzHC_T4_2013-2014_test.json"\
@@ -86,7 +86,7 @@ CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MOD
     --per_device_train_batch_size ${BATCH_SIZE} --per_device_eval_batch_size ${BATCH_SIZE} --gradient_accumulation_steps ${ACCUMULATION_STEPS} --eval_accumulation_steps ${ACCUMULATION_STEPS}
 
 CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MODEL_NAME} --seed 42\
-    --output_dir logs/${TASK}/T3_T3/${MODEL_NAME}/split_seed${SPLITSEED}_model_seed_42_3e-5\
+    --output_dir logs/${TASK}/T3_T4/${MODEL_NAME}/split_seed${SPLITSEED}_model_seed_42_3e-5\
     --train_file "$BASE_PATH/seed$SPLITSEED/amzHC_T3_2011-2012_train.json"\
     --validation_file  "$BASE_PATH/seed$SPLITSEED/amzHC_T3_2011-2012_validation.json"\
     --test_file  "$BASE_PATH/seed$SPLITSEED/amzHC_T4_2013-2014_test.json"\
@@ -95,7 +95,7 @@ CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MOD
     --per_device_train_batch_size ${BATCH_SIZE} --per_device_eval_batch_size ${BATCH_SIZE} --gradient_accumulation_steps ${ACCUMULATION_STEPS} --eval_accumulation_steps ${ACCUMULATION_STEPS}
 
 CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MODEL_NAME} --seed 42\
-    --output_dir logs/${TASK}/T3_T3/${MODEL_NAME}/split_seed${SPLITSEED}_model_seed_42_3e-5\
+    --output_dir logs/${TASK}/T4_T4/${MODEL_NAME}/split_seed${SPLITSEED}_model_seed_42_3e-5\
     --train_file "$BASE_PATH/seed$SPLITSEED/amzHC_T4_2013-2014_train.json"\
     --validation_file  "$BASE_PATH/seed$SPLITSEED/amzHC_T4_2013-2014_validation.json"\
     --test_file  "$BASE_PATH/seed$SPLITSEED/amzHC_T4_2013-2014_test.json"\

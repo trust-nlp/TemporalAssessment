@@ -650,10 +650,26 @@ def main():
 
     #metric = evaluate.load("squad_v2" if data_args.version_2_with_negative else "squad")
 
-    metric = evaluate.load("bleu")
+    metric_bleu = evaluate.load("bleu")
+    metric_google_bleu = evaluate.load("google_bleu")
+    metric_bleurt = load("bleurt", module_type="metric")
+    metric_exact_match = evaluate.load("exact_match")
+    metric_rouge = evaluate.load('rouge')
 
     def compute_metrics(p: EvalPrediction):
-        return metric.compute(predictions=p.predictions, references=p.label_ids)
+        bleurt=metric_bleurt.compute(predictions=p.predictions, references=p.label_ids["default"])
+        bleu=metric_bleu.compute(predictions=p.predictions, references=p.label_ids["bleu"])
+        exact_match=metric_exact_match.compute(predictions=p.predictions, references=p.label_ids["default"])
+        google_bleu =metric_google_bleu.compute(predictions=p.predictions, references=p.label_ids["bleu"])
+        rouge=metric_rouge.compute(predictions=p.predictions, references=p.label_ids["default"])
+        result = {
+                "bleurt":bleurt,
+                "bleu":bleu,
+                "google_bleu":google_bleu,
+                "exact_match":exact_match,
+                "rouge":rouge
+            }
+        return result
 
     '''# Post-processing (usemetric = evaluate.load("squad_v2" if data_args.version_2_with_negative else "squad") before def compute_metrics):
     def post_processing_function_squad(
@@ -688,7 +704,7 @@ def main():
         references = [{"id": ex["id"], "answers": ex[answer_column]} for ex in examples]
         return EvalPrediction(predictions=formatted_predictions, label_ids=references)'''
     
-    def post_processing_function_bleu(examples: datasets.Dataset, features: datasets.Dataset, outputs: EvalLoopOutput, stage="eval"):
+    def post_processing_function(examples: datasets.Dataset, features: datasets.Dataset, outputs: EvalLoopOutput, stage="eval"):
         # Decode the predicted tokens.
         preds = outputs.predictions
         if isinstance(preds, tuple):
@@ -699,9 +715,12 @@ def main():
 
         # Generate references and predictions in the format expected by the BLEU metric
         predictions = [pred.strip() for pred in decoded_preds]
-        # Extracting the references (ground truths)
-        references = [[ex["answer"]["text"]] for ex in examples]
-
+        # Extracting the references (ground truths); (may need to use different format of red if using multipule metrics)
+        #references = [[ex["answer"]["text"]] for ex in examples] 
+        references = {
+        "default": [ex["answer"]["text"] for ex in examples],  # Default format, Exact match,bleurt, rouge...
+        "bleu": [[ex["answer"]["text"]] for ex in examples]  # BLEU and Google_bleu format
+        }
         return EvalPrediction(predictions=predictions, label_ids=references)
 
     # Initialize our Trainer
@@ -714,7 +733,7 @@ def main():
         tokenizer=tokenizer,
         data_collator=data_collator,
         compute_metrics=compute_metrics if training_args.predict_with_generate else None,
-        post_process_function=post_processing_function_bleu,
+        post_process_function=post_processing_function,
     )
 
     # Training
