@@ -1,12 +1,12 @@
 GPU_NUMBER="1"  #"0,1"
-TRAIN_PATH='/home/weisi/Temporal/data/BIONLP/bionlp_2017_train.json'
-TEST_PATH='/home/weisi/Temporal/data/BIONLP/bionlp_2017_test.json'
-VALIDATION_PATH='/home/weisi/Temporal/data/BIONLP/bionlp_2017_val.json'
+TRAIN_PATH='/home/weisi/TemporalAssessment/data/BIONLP/bionlp_2016_train.json'
+TEST_PATH='/home/weisi/TemporalAssessment/data/BIONLP/bionlp_2016_test.json'
+VALIDATION_PATH='/home/weisi/TemporalAssessment/data/BIONLP/bionlp_2016_val.json'
 MODEL_NAME='t5-small' #'razent/SciFive-base-Pubmed_PMC'
 BATCH_SIZE=32 #32?
 ACCUMULATION_STEPS=2
 TASK='bionlpQA'
-YEAR='2017' #train17test18: train in 20xx test in 20xx; 20xx: train and test in 20xx
+YEAR='2016' #train17test18: train in 20xx test in 20xx; 20xx: train and test in 20xx
 
 
 
