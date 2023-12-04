@@ -658,6 +658,8 @@ def main():
 
     def compute_metrics(p: EvalPrediction):
         #bleurt=metric_bleurt.compute(predictions=p.predictions, references=p.label_ids["default"])
+        #print("p.label_ids default",p.label_ids["default"])
+        #print("p.label_ids bleu",p.label_ids["bleu"])
         bleu=metric_bleu.compute(predictions=p.predictions, references=p.label_ids["bleu"])
         exact_match=metric_exact_match.compute(predictions=p.predictions, references=p.label_ids["default"])
         google_bleu =metric_google_bleu.compute(predictions=p.predictions, references=p.label_ids["bleu"])
@@ -716,10 +718,10 @@ def main():
         # Generate references and predictions in the format expected by the BLEU metric
         predictions = [pred.strip() for pred in decoded_preds]
         # Extracting the references (ground truths); (may need to use different format of red if using multipule metrics)
-        #references = [[ex["answer"]["text"]] for ex in examples] 
+        #references = [[ex["answer"]["text"]] for ex in examples]
         references = {
-        "default": [ex["answer"]["text"] for ex in examples],  # Default format, Exact match,bleurt, rouge...
-        "bleu": [[ex["answer"]["text"]] for ex in examples]  # BLEU and Google_bleu format
+        "default": [ex["answer"]["text"][0]  for ex in examples],  # Default format, Exact match,bleurt, rouge...
+        "bleu": [ex["answer"]["text"] for ex in examples]  # BLEU and Google_bleu format
         }
         return EvalPrediction(predictions=predictions, label_ids=references)
 

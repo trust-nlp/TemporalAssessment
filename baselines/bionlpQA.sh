@@ -27,8 +27,8 @@ CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python /home/weisi/TemporalAssessment/baselin
   --per_device_eval_batch_size ${BATCH_SIZE} \
   --gradient_accumulation_steps ${ACCUMULATION_STEPS} \
   --learning_rate 3e-5 \
-  --num_train_epochs 10 \
+  --num_train_epochs 1 \
   --max_seq_length 384 \
   --doc_stride 128 \
   --seed 24  \
-  --output_dir logs/${TASK}/${YEAR}/${MODEL_NAME}/seed_24
+  --output_dir logs/${TASK}/${YEAR}/${MODEL_NAME}/seed_24_test2
