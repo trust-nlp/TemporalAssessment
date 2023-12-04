@@ -652,18 +652,18 @@ def main():
 
     metric_bleu = evaluate.load("bleu")
     metric_google_bleu = evaluate.load("google_bleu")
-    metric_bleurt = load("bleurt", module_type="metric")
+    #metric_bleurt = evaluate.load("bleurt", module_type="metric")  #bleurt is too memory consuming
     metric_exact_match = evaluate.load("exact_match")
     metric_rouge = evaluate.load('rouge')
 
     def compute_metrics(p: EvalPrediction):
-        bleurt=metric_bleurt.compute(predictions=p.predictions, references=p.label_ids["default"])
+        #bleurt=metric_bleurt.compute(predictions=p.predictions, references=p.label_ids["default"])
         bleu=metric_bleu.compute(predictions=p.predictions, references=p.label_ids["bleu"])
         exact_match=metric_exact_match.compute(predictions=p.predictions, references=p.label_ids["default"])
         google_bleu =metric_google_bleu.compute(predictions=p.predictions, references=p.label_ids["bleu"])
         rouge=metric_rouge.compute(predictions=p.predictions, references=p.label_ids["default"])
         result = {
-                "bleurt":bleurt,
+                #"bleurt":bleurt,
                 "bleu":bleu,
                 "google_bleu":google_bleu,
                 "exact_match":exact_match,
