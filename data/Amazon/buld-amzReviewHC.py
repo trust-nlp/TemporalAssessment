@@ -8,7 +8,7 @@ from tqdm import tqdm
 import numpy as np
 from sklearn.model_selection import train_test_split
 import gzip
-
+#usage: python -m data.Amazon.buld-amzReviewHC
 hcpath='/HDD16TB/weisi/amazon_us_reviews/Health_Personal_Care_v1_00/0.1.0/reviews_Health_and_Personal_Care_5.json.gz'
 
 with gzip.open(hcpath,'rt') as f:
@@ -98,7 +98,7 @@ for seed in range(1, 6):  # randomly split 5 times
     split_and_save_datasets(df_2009_2010_sampled, 'amzHC_T2_2009-2010',seed,folder_path)
     split_and_save_datasets(df_2011_2012_sampled, 'amzHC_T3_2011-2012',seed,folder_path)
     split_and_save_datasets(df_2013_2014_sampled, 'amzHC_T4_2013-2014',seed,folder_path)
-    split_and_save_datasets(all_year_sampled, 'amzHC_AY_2007-2014',seed,folder_path)
+    split_and_save_datasets(all_year_sampled, 'amzHC_AY_2007-2012',seed,folder_path)
 
 
 
