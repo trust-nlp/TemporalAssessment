@@ -65,7 +65,7 @@ df_2007_2008 = hcdf[hcdf['year'].isin([2007, 2008])]
 df_2009_2010 = hcdf[hcdf['year'].isin([2009, 2010])]
 df_2011_2012 = hcdf[hcdf['year'].isin([2011, 2012])]
 df_2013_2014 = hcdf[hcdf['year'].isin([2013, 2014])]
-df_all_year= hcdf[hcdf['year'].isin([2007, 2014])]
+df_all_year= hcdf[hcdf['year'].isin([2007, 2012])]
 
 min_size = min(len(df_2007_2008), len(df_2009_2010),len(df_2011_2012), len(df_2013_2014))
 
