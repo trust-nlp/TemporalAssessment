@@ -10,9 +10,10 @@ file_name = 'predict_results.json'
 
 results = {}
 
-
+#razent/SciFive-base-Pubmed_PMC
+#'t5-base'
 for option in options:
-    file_path = os.path.join(base_dir, option.replace('-', '_'), 't5-base', 'split_seed1_model_seed_42_3e-5', file_name)
+    file_path = os.path.join(base_dir, option.replace('-', '_'), 't5-base', 'split_seed2_model_seed_42_3e-5', file_name)
     if os.path.exists(file_path):
         with open(file_path, 'r') as file:
             data = json.load(file)
@@ -26,4 +27,4 @@ for option in options:
 
 
 df = pd.DataFrame.from_dict(results, orient='index', columns=['bleu', '1 precision', '2 precision', '3 precision', '4 precision', 'exact_match', 'google_bleu', 'rouge1', 'rouge2', 'rougeL', 'rougeLsum'])
-df.to_csv('scores.csv')
+df.to_csv('bionlp_scores_t5-base_seed2.csv')
