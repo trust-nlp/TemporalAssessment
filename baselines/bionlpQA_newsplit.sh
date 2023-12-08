@@ -1,11 +1,11 @@
 GPU_NUMBER="1"  #"0,1"
 RUN_FILE='/home/weisi/TemporalAssessment/baselines/QA_seq2seq.py'
 BASE_PATH='/home/weisi/TemporalAssessment/data/BIONLP/newsplit'
-MODEL_NAME='razent/SciFive-base-Pubmed_PMC' #'razent/SciFive-base-Pubmed_PMC' 't5-base'
+MODEL_NAME='t5-base' #'razent/SciFive-base-Pubmed_PMC' 't5-base'
 BATCH_SIZE=32 #32?
 ACCUMULATION_STEPS=2
 SPLITSEED=2
-TASK='bionlpQA'
+TASK='BIONLP_newsplit'
 
 #AY-T4 T1-T1 T1-T2 T1-T3 T1-T4 T2-T2 T2-T3 T2-T4 T3-T3 T3-T4 T4-T4 
 
