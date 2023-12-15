@@ -4,7 +4,7 @@ import os
 # Downloaded all year dataset from BIOASQ chanllenge taskb: from year 2014 to 2024
 # note that the data in 2014 challenge dataset 2b is actually the 2013 data, so we map the year from 2013 to 2023
 # the training data are renamed and in the format like: BioASQ-trainingDataset2b.json
-def process_files(data_folder, output_folder，start_year=2013, end_year=2023):
+def process_files(data_folder, output_folder, start_year=2013, end_year=2023):
     id_to_year = {}
     for year in range(start_year, end_year + 1):
         file_name = f"BioASQ-trainingDataset{year - 2011}b.json"
