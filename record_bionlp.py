@@ -3,7 +3,8 @@ import os
 import pandas as pd
 
 # paths
-base_dir = '/home/weisi/TemporalAssessment/logs/bionlpQA'
+#base_dir = '/home/weisi/TemporalAssessment/logs/bionlpQA'
+base_dir = '/home/weisi/TemporalAssessment/logs/BIONLP_newsplit'
 options = ['T1-T1', 'T1-T2', 'T1-T3', 'T1-T4', 'T2-T2', 'T2-T3', 'T2-T4', 'T3-T3', 'T3-T4', 'T4-T4', 'AY-T4']
 file_name = 'predict_results.json'
 
@@ -27,4 +28,4 @@ for option in options:
 
 
 df = pd.DataFrame.from_dict(results, orient='index', columns=['bleu', '1 precision', '2 precision', '3 precision', '4 precision', 'exact_match', 'google_bleu', 'rouge1', 'rouge2', 'rougeL', 'rougeLsum'])
-df.to_csv('bionlp_scores_t5-base_seed2.csv')
+df.to_csv('bionlp_newsplit_scores_t5-base_seed1.csv')

@@ -22,7 +22,7 @@ df_2014_2016 = df[df['year'].isin([2014, 2016])]
 df_2017 = df[df['year'] == 2017]
 df_2018 = df[df['year']== 2018]
 df_2019 = df[df['year']== 2019]
-#df_2020_2021 = df[df['year'].isin([2020, 2021])]
+df_2020_2021 = df[df['year'].isin([2020, 2021])]
 df_all_year= df[df['year'].isin([2014, 2018])]
 
 min_size = min(len(df_2014_2016), len(df_2017),len(df_2018), len(df_2019))
@@ -40,7 +40,7 @@ def split_and_save_datasets(df,period,seed,folder_path):
     test.to_json(os.path.join(folder_path, test_filename), orient='records', lines=True)
 
 
-for seed in range(1, 6):  # randomly split 5 times
+for seed in range(1, 2):  # randomly split 5 times
     folder_path ='/home/weisi/TemporalAssessment/data/BIONLP/newsplit/seed{}/'.format(seed)
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
