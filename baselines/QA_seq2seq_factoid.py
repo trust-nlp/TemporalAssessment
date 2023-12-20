@@ -649,7 +649,7 @@ def main():
         bleu=metric_bleu.compute(predictions=p.predictions, references=p.label_ids["bleu"])
         exact_match=metric_exact_match.compute(predictions=p.predictions, references=p.label_ids["default"])
         google_bleu =metric_google_bleu.compute(predictions=p.predictions, references=p.label_ids["bleu"])
-        rouge=metric_rouge.compute(predictions=p.predictions, references=p.label_ids["default"])
+        rouge=metric_rouge.compute(predictions=p.predictions, references=p.label_ids["bleu"])
         result = {
                 #"bleurt":bleurt,
                 "bleu":bleu,
@@ -686,22 +686,22 @@ def main():
         #references = [[ex["answer"]["text"]] for ex in examples]
         ############# 
         '''for ideal answer: the answer can have different representation
-        (the ideal answer could be a list and all of the items in the list are right)'''
+            (the ideal answer could be a list and all of the items in the list are right)'''
+        '''for exact answer, the right answer could be a list, 
+            missing one should be considered wrong'''
         ###############
-        '''references = {
-        "default": [ex[answer_column][0]  for ex in examples],  # Default format, Exact match,bleurt, rouge...
-        "bleu": [ex[answer_column] for ex in examples]  # BLEU and Google_bleu format
-        }'''
-        ##############
-
-        '''for exact answer, the right answer could be a list, missing one should be considered wrong'''
-        references = {
-        "default": [", ".join(ex[answer_column]) for ex in examples],  # Default format, Exact match,bleurt, rouge...
-        "bleu": [ex[answer_column] for ex in examples]  # BLEU and Google_bleu format
-        }
+        if answer_column=='exact_answer':
+            references = {
+                "default": [", ".join(ex[answer_column]) for ex in examples],  # Default format, Exact match,bleurt, rouge...
+                "bleu": [ex[answer_column] for ex in examples]  # BLEU and Google_bleu format
+            }
+        else: 
+            references = {
+                "default": [ex[answer_column][0]  for ex in examples],  # Default format, Exact match,bleurt, rouge...
+                "bleu": [ex[answer_column] for ex in examples]  # BLEU and Google_bleu format
+            }
         #print('****** post_processing_function prediction:' ,predictions,len(predictions))
         #print('****** post_processing_function reference:' ,references,len(references))
-    
         return EvalPrediction(predictions=predictions, label_ids=references)
 
     # Initialize our Trainer
@@ -796,9 +796,12 @@ def main():
             for index, example in enumerate(predict_examples):
 
                 #reference = example["answers"]["text"][0] if len(example["answers"]["text"]) > 0 else "No Answer"
-                #reference = example["answers"][0] if len(example["answers"][0]) > 0 else "No Answer"
+                #
                 #if answer is a list: example["answers"]=example[answer_column]
-                reference = example[answer_column] if len(example[answer_column]) > 0 else "No Answer"
+                if answer_column=='exact_answer':
+                    reference = ", ".join(example[answer_column]) if len(example[answer_column]) > 0 else "No Answer"
+                else:
+                    reference = example[answer_column][0] if len(example[answer_column][0]) > 0 else "No Answer"
                 model_prediction = predictions[index]
                 writer.write(f"{index}\t{example[question_column]}\t{reference}\t{model_prediction}\n")
 
