@@ -1,4 +1,5 @@
-# config_classes.py
+# config_classes.py 
+# usage: from config_classes import ModelArguments, DataTrainingArguments
 
 from dataclasses import dataclass, field
 from typing import Optional
