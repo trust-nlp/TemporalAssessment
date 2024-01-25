@@ -1,37 +1,23 @@
-#!/usr/bin/env python
-# coding=utf-8
-# Copyright 2020 The HuggingFace Inc. team. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-""" Finetuning the library models for text classification."""
-# You can also adapt this script on your own text classification task. Pointers for this are left as comments.
-'''banned the use of dataset_name, this script will split the prepared train_file to train_dataset and validation,
-    and sample the test_file totest_dataset'''
-
+from config_classes import ModelArguments, DataTrainingArguments
+from transformers import RobertaModel, RobertaConfig
+import torch
+import torch.nn as nn
+from transformers.modeling_outputs import (
+    SequenceClassifierOutput, 
+    TokenClassifierOutput, 
+    QuestionAnsweringModelOutput
+)
+import transformers
+from transformers.modeling_roberta import *
 import logging
 import os
 import random
 import sys
 import warnings
-from config_classes import ModelArguments, DataTrainingArguments
 from typing import List, Optional
-
 import datasets
 import evaluate
 import numpy as np
-from datasets import Value, load_dataset
-
-import transformers
 from transformers import (
     AutoConfig,
     AutoModelForSequenceClassification,
@@ -47,21 +33,140 @@ from transformers import (
 from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import check_min_version, send_example_telemetry
 from transformers.utils.versions import require_version
-#from scipy.special import expit as sigmoid
-
-# Will error if the minimal version of Transformers is not installed. Remove at your own risks.
-#check_min_version("4.36.0.dev0")
 
 require_version("datasets>=1.8.0", "To fix: pip install -r examples/pytorch/text-classification/requirements.txt")
-
-
 logger = logging.getLogger(__name__)
 
-def main():
-    # See all possible arguments in src/transformers/training_args.py
-    # or by passing the --help flag to this script.
-    # We now keep distinct sets of args, for a cleaner separation of concerns.
+class Adapter(nn.Module):
+    def __init__(self, config):
+        super().__init__()
+        self.down = nn.Linear(config.hidden_size, config.hidden_size) # (in_feature, out_feature) didn't change here
+        self.act = torch.nn.GELU()
+        self.up = nn.Linear(config.hidden_size, config.hidden_size)
+        self.LayerNorm = nn.LayerNorm(config.hidden_size)
+        self.dropout = nn.Dropout(0.1)
 
+    def forward(self, x):
+        return self.LayerNorm(x + self.dropout(self.up(self.act(self.down(x)))))
+
+class AdaptedRobertaForMultipleTasks(RobertaModel):
+    """
+    Custom Roberta model for handling multiple tasks: classification, NER, QA.
+    Inherits from RobertaModel and adds task-specific heads and an adapter.
+    """
+    def __init__(self, config):
+        super().__init__(config)
+        self.num_labels = config.num_labels
+        self.config = config
+        self.roberta = RobertaModel(config, add_pooling_layer=False)
+        # Task-specific heads
+        if config.task_name == "classification":
+            self.classifier = RobertaClassificationHead(config) 
+        elif config.task_name == "ner":
+            ner_classifier_dropout = (config.classifier_dropout if config.classifier_dropout is not None else config.hidden_dropout_prob)
+            self.dropout = nn.Dropout(ner_classifier_dropout)
+            self.classifier = nn.Linear(config.hidden_size, config.num_labels)
+        #self.qa_head = nn.Linear(config.hidden_size, config.num_labels)  #this cannot be used for generative QA(need to use model like T5, bloom)
+        # For start and end logits in QA config.num_labels=2，also can be self.qa_outputs = nn.Linear(config.hidden_size, config.num_labels)
+        
+        #self.adapter = Adapter(config)  #this is only one adapter.
+        # Add adapters.
+        self.adapter = nn.ModuleList([Adapter(config) for _ in range(config.num_hidden_layers // 2)])
+
+        # Add side block output head.
+        self.adapter_outputs = nn.Linear(config.hidden_size, config.num_labels)
+        # Initialize weights and apply final processing
+        self.post_init()
+
+    def forward(
+        self,
+        input_ids: Optional[torch.LongTensor] = None,
+        attention_mask: Optional[torch.FloatTensor] = None,
+        token_type_ids: Optional[torch.LongTensor] = None,
+        position_ids: Optional[torch.LongTensor] = None,
+        head_mask: Optional[torch.FloatTensor] = None,
+        inputs_embeds: Optional[torch.FloatTensor] = None,
+        labels: Optional[torch.LongTensor] = None,
+        output_attentions: Optional[bool] = None,
+        output_hidden_states: Optional[bool] = None,
+        return_dict: Optional[bool] = None,
+    ):#-> Union[Tuple[torch.Tensor], SequenceClassifierOutput]:
+        # Get the outputs of each layer
+        '''outputs = super().forward(
+            input_ids, 
+            attention_mask=attention_mask, 
+            token_type_ids=token_type_ids, 
+            output_hidden_states=True
+        )'''
+        outputs = self.roberta(
+            input_ids,
+            attention_mask=attention_mask,
+            token_type_ids=token_type_ids,
+            position_ids=position_ids,
+            head_mask=head_mask,
+            inputs_embeds=inputs_embeds,
+            output_attentions=output_attentions,
+            output_hidden_states=output_hidden_states,
+        ) # self.roberta is a RobertaModel class, the output is class BaseModelOutputWithPoolingAndCrossAttentions
+        #contains:last_hidden_state;pooler_output;hidden_states;past_key_values;attentions;cross_attentions
+
+        sequence_output = outputs[0] # last_hidden_state, the sequence output
+        if config.task_name == "ner":
+            sequence_output = self.dropout(sequence_output)
+        #1logits = self.classifier(sequence_output)
+        layer_outputs = outputs[2] # hidden_states
+
+
+        # Sum the input and output of each Transformer block
+        transformer_blocks = self.roberta.encoder.layer
+        hidden_states = outputs.hidden_states
+        adapted_sequence = hidden_states[0]  # Initial embeddings as the first input
+
+        for i, layer_module in enumerate(transformer_blocks):
+            layer_outputs = layer_module(adapted_sequence, attention_mask)
+            layer_output = layer_outputs[0]
+            adapted_sequence = hidden_states[i] + layer_output
+
+        # Apply adapter on the summed output
+        adapted_sequence = self.adapter(adapted_sequence)
+
+        if config.task_name == "classification":
+            pooled_output = adapted_sequence[:, 0, :]  # [CLS] token for classification tasks
+            logits = self.classification_head(pooled_output)
+            return SequenceClassifierOutput(logits=logits)
+        elif config.task_name == "ner":
+            logits = self.ner_head(adapted_sequence)
+            return TokenClassifierOutput(logits=logits)
+        elif config.task_name == "qa":
+            logits = self.qa_head(adapted_sequence)
+            start_logits, end_logits = logits.split(1, dim=-1)
+            start_logits = start_logits.squeeze(-1)
+            end_logits = end_logits.squeeze(-1)
+            return QuestionAnsweringModelOutput(start_logits=start_logits, end_logits=end_logits)
+        else:
+            raise ValueError('need to specify config.task_name')
+
+
+# Example usage
+config = RobertaConfig.from_pretrained("roberta-base")
+config.num_labels = 2  # For binary classification
+config.num_labels_ner = 10  # For NER with 10 different entities
+model = CustomRobertaForMultipleTasks(config)
+
+# Example inputs
+input_ids = torch.tensor([[0, 1, 2, 3, 4]])  # Example input IDs
+attention_mask = torch.tensor([[1, 1, 1, 1, 1]])  # Example attention mask
+
+# Get outputs for a specific task
+classification_output = model(input_ids, attention_mask, task="classification")
+ner_output = model(input_ids, attention_mask, task="ner")
+qa_output = model(input_ids, attention_mask, task="qa")
+
+#-----------------------------------------------------------------------------------------------------------------------
+
+def main():
+    # See all possible arguments in src/transformers/training_args.py or by passing the --help flag to this script.
+    ## -------------------------------Parsing and Logging--------------------------------------------------------------
     parser = HfArgumentParser((ModelArguments, DataTrainingArguments, TrainingArguments))
     if len(sys.argv) == 2 and sys.argv[1].endswith(".json"):
         # If we pass only one argument to the script and it's the path to a json file,
@@ -79,21 +184,15 @@ def main():
             raise ValueError("`token` and `use_auth_token` are both specified. Please set only the argument `token`.")
         model_args.token = model_args.use_auth_token
 
-    # Sending telemetry. Tracking the example usage helps us better allocate resources to maintain them. The
-    # information sent is the one passed as arguments along with your Python/PyTorch versions.
-    send_example_telemetry("run_classification", model_args, data_args)
-
     # Setup logging
     logging.basicConfig(
         format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
         datefmt="%m/%d/%Y %H:%M:%S",
         handlers=[logging.StreamHandler(sys.stdout)],
     )
-
     if training_args.should_log:
         # The default of training_args.log_level is passive, so we set log level at info here to have that default.
         transformers.utils.logging.set_verbosity_info()
-
     log_level = training_args.get_process_log_level()
     logger.setLevel(log_level)
     datasets.utils.logging.set_verbosity(log_level)
@@ -122,7 +221,8 @@ def main():
                 f"Checkpoint detected, resuming training at {last_checkpoint}. To avoid this behavior, change "
                 "the `--output_dir` or add `--overwrite_output_dir` to train from scratch."
             )
-
+    #---------------------------------------------------------------------------------------------------------------------
+            
     # Set seed before initializing model.
     set_seed(training_args.seed)
 
@@ -144,155 +244,32 @@ def main():
         logger.info(f"Dataset loaded: {raw_datasets}")
         logger.info(raw_datasets)
     else:
-        # Loading a dataset from your local files.
-        # CSV/JSON training and evaluation files are needed.
-        data_files = {"train": data_args.train_file, "validation": data_args.validation_file}
-
-        # Get the test dataset: you can provide your own CSV/JSON test file
-        if training_args.do_predict:
-            if data_args.test_file is not None:
-                train_extension = data_args.train_file.split(".")[-1]
-                test_extension = data_args.test_file.split(".")[-1]
-                assert (
-                    test_extension == train_extension
-                ), "`test_file` should have the same extension (csv or json) as `train_file`."
-                data_files["test"] = data_args.test_file
-            else:
-                raise ValueError("Need either a dataset name or a test file for `do_predict`.")
+        data_files = {}            
+        if data_args.train_file is not None:
+            data_files["train"] = data_args.train_file
+        if data_args.validation_file is not None:
+            data_files["validation"] = data_args.validation_file
+        if data_args.test_file is not None:
+            data_files["test"] = data_args.test_file
+        extension = data_args.train_file.split(".")[-1]
+        raw_datasets = load_dataset(extension, data_files=data_files, cache_dir=model_args.cache_dir,token=model_args.token)
 
         for key in data_files.keys():
             logger.info(f"load a local file for {key}: {data_files[key]}")
-
-        if data_args.train_file.endswith(".csv"):
-            # Loading a dataset from local csv files
-            raw_datasets = load_dataset(
-                "csv",
-                data_files=data_files,
-                cache_dir=model_args.cache_dir,
-                token=model_args.token,
-            )
-        else:
-            # Loading a dataset from local json files
-            raw_datasets = load_dataset(
-                "json",
-                data_files=data_files,
-                cache_dir=model_args.cache_dir,
-                token=model_args.token,
-            )
-
-    # See more about loading any type of standard or custom dataset at
-    # https://huggingface.co/docs/datasets/loading_datasets.
-
-    if data_args.remove_splits is not None:
-        for split in data_args.remove_splits.split(","):
-            logger.info(f"removing split {split}")
-            raw_datasets.pop(split)
-
-    if data_args.train_split_name is not None:
-        logger.info(f"using {data_args.validation_split_name} as validation set")
-        raw_datasets["train"] = raw_datasets[data_args.train_split_name]
-        raw_datasets.pop(data_args.train_split_name)
-
-    if data_args.validation_split_name is not None:
-        logger.info(f"using {data_args.validation_split_name} as validation set")
-        raw_datasets["validation"] = raw_datasets[data_args.validation_split_name]
-        raw_datasets.pop(data_args.validation_split_name)
-
-    if data_args.test_split_name is not None:
-        logger.info(f"using {data_args.test_split_name} as test set")
-        raw_datasets["test"] = raw_datasets[data_args.test_split_name]
-        raw_datasets.pop(data_args.test_split_name)
-
-    if data_args.remove_columns is not None:
-        for split in raw_datasets.keys():
-            for column in data_args.remove_columns.split(","):
-                logger.info(f"removing column {column} from split {split}")
-                raw_datasets[split].remove_columns(column)
-
-    if data_args.label_column_name is not None and data_args.label_column_name != "label":
-        for key in raw_datasets.keys():
-            raw_datasets[key] = raw_datasets[key].rename_column(data_args.label_column_name, "label")
-
-    # Trying to have good defaults here, don't hesitate to tweak to your needs.
-
-    is_regression = (
-        raw_datasets["train"].features["label"].dtype in ["float32", "float64"]
-        if data_args.do_regression is None
-        else data_args.do_regression
-    )
-
-    is_multi_label = False
-    if is_regression:
-        label_list = None
-        num_labels = 1
-        # regession requires float as label type, let's cast it if needed
-        for split in raw_datasets.keys():
-            if raw_datasets[split].features["label"].dtype not in ["float32", "float64"]:
-                logger.warning(
-                    f"Label type for {split} set to float32, was {raw_datasets[split].features['label'].dtype}"
-                )
-                features = raw_datasets[split].features
-                features.update({"label": Value("float32")})
-                try:
-                    raw_datasets[split] = raw_datasets[split].cast(features)
-                except TypeError as error:
-                    logger.error(
-                        f"Unable to cast {split} set to float32, please check the labels are correct, or maybe try with --do_regression=False"
-                    )
-                    raise error
-
-    else:  # classification
-        if raw_datasets["train"].features["label"].dtype == "list":  # multi-label classification
-            is_multi_label = True
-            logger.info("Label type is list, doing multi-label classification")
-        # Trying to find the number of labels in a multi-label classification task
-        # We have to deal with common cases that labels appear in the training set but not in the validation/test set.
-        # So we build the label list from the union of labels in train/val/test.
-        label_list = get_label_list(raw_datasets, split="train")
-        for split in ["validation", "test"]:
-            if split in raw_datasets:
-                val_or_test_labels = get_label_list(raw_datasets, split=split)
-                diff = set(val_or_test_labels).difference(set(label_list))
-                if len(diff) > 0:
-                    # add the labels that appear in val/test but not in train, throw a warning
-                    logger.warning(
-                        f"Labels {diff} in {split} set but not in training set, adding them to the label list"
-                    )
-                    label_list += list(diff)
-        # if label is -1, we throw a warning and remove it from the label list
-        for label in label_list:
-            if label == -1:
-                logger.warning("Label -1 found in label list, removing it.")
-                label_list.remove(label)
-
-        label_list.sort()
-        num_labels = len(label_list)
-        if num_labels <= 1:
-            raise ValueError("You need more than one label to do classification.")
-
+    
     # Load pretrained model and tokenizer
     # In distributed training, the .from_pretrained methods guarantee that only one local process can concurrently
     # download model & vocab.
     config = AutoConfig.from_pretrained(
         model_args.config_name if model_args.config_name else model_args.model_name_or_path,
         num_labels=num_labels,
-        finetuning_task="text-classification",
+        #finetuning_task="text-classification", 
+        task_name=data_args.task_name,
         cache_dir=model_args.cache_dir,
         revision=model_args.model_revision,
         token=model_args.token,
         trust_remote_code=model_args.trust_remote_code,
     )
-
-    if is_regression:
-        config.problem_type = "regression"
-        logger.info("setting problem type to regression")
-    elif is_multi_label:
-        config.problem_type = "multi_label_classification"
-        logger.info("setting problem type to multi label classification")
-    else:
-        config.problem_type = "single_label_classification"
-        logger.info("setting problem type to single label classification")
-
     tokenizer = AutoTokenizer.from_pretrained(
         model_args.tokenizer_name if model_args.tokenizer_name else model_args.model_name_or_path,
         cache_dir=model_args.cache_dir,
@@ -311,14 +288,158 @@ def main():
         trust_remote_code=model_args.trust_remote_code,
         ignore_mismatched_sizes=model_args.ignore_mismatched_sizes,
     )
+    #QA: AutoModelForSeq2SeqLM.from_pretrained()  ner: AutoModelForTokenClassification
 
-    # Padding strategy
-    if data_args.pad_to_max_length:
-        padding = "max_length"
-    else:
-        # We will pad later, dynamically at batch creation, to the max sequence length in each batch
-        padding = False
+    ## data    
+    if data_args.task_name == 'classification':
+        if data_args.remove_splits is not None:
+            for split in data_args.remove_splits.split(","):
+                logger.info(f"removing split {split}")
+                raw_datasets.pop(split)
 
+        if data_args.train_split_name is not None:
+            logger.info(f"using {data_args.validation_split_name} as validation set")
+            raw_datasets["train"] = raw_datasets[data_args.train_split_name]
+            raw_datasets.pop(data_args.train_split_name)
+
+        if data_args.validation_split_name is not None:
+            logger.info(f"using {data_args.validation_split_name} as validation set")
+            raw_datasets["validation"] = raw_datasets[data_args.validation_split_name]
+            raw_datasets.pop(data_args.validation_split_name)
+
+        if data_args.test_split_name is not None:
+            logger.info(f"using {data_args.test_split_name} as test set")
+            raw_datasets["test"] = raw_datasets[data_args.test_split_name]
+            raw_datasets.pop(data_args.test_split_name)
+
+        if data_args.remove_columns is not None:
+            for split in raw_datasets.keys():
+                for column in data_args.remove_columns.split(","):
+                    logger.info(f"removing column {column} from split {split}")
+                    raw_datasets[split].remove_columns(column)
+
+        if data_args.label_column_name is not None and data_args.label_column_name != "label":
+            for key in raw_datasets.keys():
+                raw_datasets[key] = raw_datasets[key].rename_column(data_args.label_column_name, "label")
+
+        # Trying to have good defaults here, don't hesitate to tweak to your needs.
+        is_regression = (
+            raw_datasets["train"].features["label"].dtype in ["float32", "float64"]
+            if data_args.do_regression is None
+            else data_args.do_regression
+        )
+
+        is_multi_label = False
+        if is_regression:
+            label_list = None
+            num_labels = 1
+            # regession requires float as label type, let's cast it if needed
+            for split in raw_datasets.keys():
+                if raw_datasets[split].features["label"].dtype not in ["float32", "float64"]:
+                    logger.warning(
+                        f"Label type for {split} set to float32, was {raw_datasets[split].features['label'].dtype}"
+                    )
+                    features = raw_datasets[split].features
+                    features.update({"label": Value("float32")})
+                    try:
+                        raw_datasets[split] = raw_datasets[split].cast(features)
+                    except TypeError as error:
+                        logger.error(
+                            f"Unable to cast {split} set to float32, please check the labels are correct, or maybe try with --do_regression=False"
+                        )
+                        raise error
+
+        else:  # classification
+            if raw_datasets["train"].features["label"].dtype == "list":  # multi-label classification
+                is_multi_label = True
+                logger.info("Label type is list, doing multi-label classification")
+            # Trying to find the number of labels in a multi-label classification task
+            # We have to deal with common cases that labels appear in the training set but not in the validation/test set.
+            # So we build the label list from the union of labels in train/val/test.
+            label_list = get_label_list(raw_datasets, split="train")
+            for split in ["validation", "test"]:
+                if split in raw_datasets:
+                    val_or_test_labels = get_label_list(raw_datasets, split=split)
+                    diff = set(val_or_test_labels).difference(set(label_list))
+                    if len(diff) > 0:
+                        # add the labels that appear in val/test but not in train, throw a warning
+                        logger.warning(
+                            f"Labels {diff} in {split} set but not in training set, adding them to the label list"
+                        )
+                        label_list += list(diff)
+            # if label is -1, we throw a warning and remove it from the label list
+            for label in label_list:
+                if label == -1:
+                    logger.warning("Label -1 found in label list, removing it.")
+                    label_list.remove(label)
+
+            label_list.sort()
+            num_labels = len(label_list)
+            if num_labels <= 1:
+                raise ValueError("You need more than one label to do classification.")
+        if is_regression:
+            config.problem_type = "regression"
+            logger.info("setting problem type to regression")
+        elif is_multi_label:
+            config.problem_type = "multi_label_classification"
+            logger.info("setting problem type to multi label classification")
+        else:
+            config.problem_type = "single_label_classification"
+            logger.info("setting problem type to single label classification")
+
+        # Padding strategy
+        if data_args.pad_to_max_length:
+            padding = "max_length"
+        else:
+            # We will pad later, dynamically at batch creation, to the max sequence length in each batch
+            padding = False    
+    ##############----------NER-----------#####################
+    if data_args.task_name == 'ner':
+        if training_args.do_train:
+            column_names = raw_datasets["train"].column_names
+            features = raw_datasets["train"].features
+        else:
+            column_names = raw_datasets["validation"].column_names
+            features = raw_datasets["validation"].features
+
+        # if text_column_name and label_column_name are not specified, use tokens and ner_tags.
+        if data_args.text_column_name is not None:
+            text_column_name = data_args.text_column_name
+        elif "tokens" in column_names:
+            text_column_name = "tokens"
+        else:
+            text_column_name = column_names[0]
+
+        if data_args.label_column_name is not None:
+            label_column_name = data_args.label_column_name
+        elif f"{data_args.task_name}_tags" in column_names:
+            label_column_name = f"{data_args.task_name}_tags"
+        else:
+            label_column_name = column_names[1]
+
+        # In the event the labels are not a `Sequence[ClassLabel]`, we will need to go through the dataset to get the
+        # unique labels.
+        def get_label_list(labels):
+            unique_labels = set()
+            for label in labels:
+                unique_labels = unique_labels | set(label)
+            label_list = list(unique_labels)
+            label_list.sort()
+            return label_list
+
+        # If the labels are of type ClassLabel, they are already integers and we have the map stored somewhere.
+        # Otherwise, we have to get the list of labels manually.
+        labels_are_int = isinstance(features[label_column_name].feature, ClassLabel)
+        if labels_are_int:
+            label_list = features[label_column_name].feature.names
+            label_to_id = {i: i for i in range(len(label_list))}
+        else:
+            label_list = get_label_list(raw_datasets["train"][label_column_name])
+            label_to_id = {l: i for i, l in enumerate(label_list)}
+
+        num_labels = len(label_list)
+    #---------------------------------------------------------------------
+         
     # for training ,we will update the config with label infos,
     # if do_train is not set, we will use the label infos in the config
     if training_args.do_train and not is_regression:  # classification, training
@@ -429,10 +550,6 @@ def main():
             logger.info("Using mean squared error (mse) as regression score, you can use --metric_name to overwrite.")
         else:
             if is_multi_label:
-                '''metric = evaluate.load("f1",config_name="multilabel")
-                logger.info(
-                    "Using multilabel F1 for multi-label classification task, you can use --metric_name to overwrite."
-                )'''
                 f1_metric = evaluate.load("f1",config_name="multilabel")
                 accuracy_metric = evaluate.load("accuracy",config_name="multilabel")
                 precision_metric = evaluate.load("precision",config_name="multilabel")
@@ -441,7 +558,6 @@ def main():
                     "Using multilabel F1, accuracy, precision, recall for multi-label classification task, you can use --metric_name to overwrite."
                 )
             else:
-                #metric = evaluate.combine("f1","accuracy","precision","recall")
                 f1_metric = evaluate.load("f1")
                 accuracy_metric = evaluate.load("accuracy")
                 precision_metric = evaluate.load("precision")
@@ -575,8 +691,4 @@ def main():
 
 def _mp_fn(index):
     # For xla_spawn (TPUs)
-    main()
-
-
-if __name__ == "__main__":
     main()

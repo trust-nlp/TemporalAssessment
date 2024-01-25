@@ -72,7 +72,7 @@ class DataTrainingArguments:
     """
     Arguments pertaining to what data we are going to input our model for training and eval.
     """
-    task_name: Optional[str] = field(default=None, metadata={"help": "The name of the task (ner, pos...)."}) 
+    task_name: Optional[str] = field(default=None, metadata={"help": "The name of the task (ner, pos...),seq2seq_qa,classification."}) 
         #this config is for ner task, QA and classification won't use this config. for ner task use --task_name ner (must be lower case) --pad_to_max_length False  
     dataset_name: Optional[str] = field(
         default=None, metadata={"help": "The name of the dataset to use (via the datasets library)."}
