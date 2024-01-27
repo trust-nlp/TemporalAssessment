@@ -74,6 +74,13 @@ class DataTrainingArguments:
     """
     task_name: Optional[str] = field(default=None, metadata={"help": "The name of the task (ner, pos...),seq2seq_qa,classification."}) 
         #this config is for ner task, QA and classification won't use this config. for ner task use --task_name ner (must be lower case) --pad_to_max_length False  
+    '''split_seed: int = field(
+        default=42, metadata={"help": "Random seed that will be used to split dataset to train, validation and test datasets, defalt ratio is 0.6 0.2 0.2"}
+    )
+    train_ratio: int = field(
+        default=0.6, metadata={"help": "ratio that will be used to split dataset to train dataset, defalt ratio 0.6"}
+    )
+    split_year'''
     dataset_name: Optional[str] = field(
         default=None, metadata={"help": "The name of the dataset to use (via the datasets library)."}
     )
