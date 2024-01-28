@@ -153,7 +153,7 @@ class DataTrainingArguments:
     ) #  defalt was False for NER TASK in baselines
     
     #-------------------Classification and NER------------------
-    text_column_names: Optional[str] = field(
+    text_column_name: Optional[str] = field(
         default=None,
         metadata={
             "help": (

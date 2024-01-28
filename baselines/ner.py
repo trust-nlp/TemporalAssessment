@@ -1,32 +1,28 @@
-from config_classes import ModelArguments, DataTrainingArguments
-from transformers import RobertaModel, RobertaConfig
-import torch
-import torch.nn as nn
-from transformers.modeling_outputs import (
-    SequenceClassifierOutput, 
-    TokenClassifierOutput, 
-    QuestionAnsweringModelOutput
-)
-import transformers
-from transformers.modeling_roberta import *
+from utils.config_classes import ModelArguments, DataTrainingArguments
+
 import logging
 import os
-import random
 import sys
 import warnings
-from typing import List, Optional
+from dataclasses import dataclass, field
+from typing import Optional
+
 import datasets
+import evaluate
 import numpy as np
+from datasets import ClassLabel, load_dataset
+
+import transformers
 from transformers import (
     AutoConfig,
-    AutoModelForSequenceClassification,
+    AutoModelForTokenClassification,
     AutoTokenizer,
-    DataCollatorWithPadding,
-    EvalPrediction,
+    DataCollatorForTokenClassification,
     HfArgumentParser,
+    PretrainedConfig,
+    PreTrainedTokenizerFast,
     Trainer,
     TrainingArguments,
-    default_data_collator,
     set_seed,
 )
 from transformers.trainer_utils import get_last_checkpoint
@@ -35,32 +31,17 @@ from transformers.utils.versions import require_version
 
 import importlib
 from typing import List, Optional, Union
-import datasets
 from seqeval.metrics import accuracy_score, classification_report
+import datasets
+#from evaluate.metrics import Seqeval as OriginalSeqeval
 import evaluate
 
 
 require_version("datasets>=1.8.0", "To fix: pip install -r examples/pytorch/text-classification/requirements.txt")
 logger = logging.getLogger(__name__)
 
-
-class Seqeval(evaluate.Metric):
-    def _info(self):
-        return evaluate.MetricInfo(
-            description=_DESCRIPTION,
-            citation=_CITATION,
-            homepage="https://github.com/chakki-works/seqeval",
-            inputs_description=_KWARGS_DESCRIPTION,
-            features=datasets.Features(
-                {
-                    "predictions": datasets.Sequence(datasets.Value("string", id="label"), id="sequence"),
-                    "references": datasets.Sequence(datasets.Value("string", id="label"), id="sequence"),
-                }
-            ),
-            codebase_urls=["https://github.com/chakki-works/seqeval"],
-            reference_urls=["https://github.com/chakki-works/seqeval"],
-        )
-
+OriginalSeqeval = evaluate.load("seqeval").__class__
+class Seqeval(OriginalSeqeval):
     def _compute(
         self,
         predictions,
@@ -252,6 +233,15 @@ def main():
         label_list.sort()
         return label_list
     
+    def get_label_list(dataset, label_column_name):
+        unique_labels = set()
+        for split in dataset.keys():  
+            labels = dataset[split][label_column_name]
+            for label in labels:
+                unique_labels = unique_labels | set(label)
+        label_list = list(unique_labels)
+        label_list.sort()
+        return label_list
     # If the labels are of type ClassLabel, they are already integers and we have the map stored somewhere.
     # Otherwise, we have to get the list of labels manually.
     labels_are_int = isinstance(features[label_column_name].feature, ClassLabel)
@@ -259,9 +249,11 @@ def main():
         label_list = features[label_column_name].feature.names
         label_to_id = {i: i for i in range(len(label_list))}
     else:
-        #label_list =['tim-nam', 'org-leg', 'tim-dow', 'art-nam', 'per-fam', 'per-giv', 'org-nam', 'tim-clo', 'gpe-nam', 'art-add', 'per-ini', 'nat-nam', 'per-nam', 'geo-nam', 'eve-nam', 'tim-yoc', 'eve-ord', 'tim-dat', 'per-tit', 'per-mid', 'tim-dom', 'tim-moy', 'per-ord', 'O']
-        label_list = get_label_list(raw_datasets["train"][label_column_name])
+        #gmb：label_list =['tim-nam', 'org-leg', 'tim-dow', 'art-nam', 'per-fam', 'per-giv', 'org-nam', 'tim-clo', 'gpe-nam', 'art-add', 'per-ini', 'nat-nam', 'per-nam', 'geo-nam', 'eve-nam', 'tim-yoc', 'eve-ord', 'tim-dat', 'per-tit', 'per-mid', 'tim-dom', 'tim-moy', 'per-ord', 'O']
+        #label_list = get_label_list(raw_datasets["train"][label_column_name]) #some cases train dataset doesn't include all labels 
+        label_list = get_label_list(raw_datasets, label_column_name)
         label_to_id = {l: i for i, l in enumerate(label_list)}
+  
 
     num_labels = len(label_list)
 
@@ -443,7 +435,7 @@ def main():
 
     # Metrics
     #metric = evaluate.load("seqeval") #we'll use a new defined seqeval
-
+    
     def compute_metrics(p):
         predictions, labels = p
         predictions = np.argmax(predictions, axis=2)
