@@ -49,7 +49,7 @@ class Adapter(nn.Module):
     def forward(self, x):
         return self.LayerNorm(x + self.dropout(self.up(self.act(self.down(x)))))
 
-class AdaptedRobertaForMultipleTasks(RobertaModel):
+class AdaptedRoberta(RobertaModel):
     """
     Custom Roberta model for handling multiple tasks: classification, NER, QA.
     Inherits from RobertaModel and adds task-specific heads and an adapter.
@@ -70,11 +70,13 @@ class AdaptedRobertaForMultipleTasks(RobertaModel):
         # For start and end logits in QA config.num_labels=2，also can be self.qa_outputs = nn.Linear(config.hidden_size, config.num_labels)
         
         #self.adapter = Adapter(config)  #this is only one adapter.
-        # Add adapters.
-        self.adapter = nn.ModuleList([Adapter(config) for _ in range(config.num_hidden_layers // 2)])
+        # Add adapters. 2 adapters
+        self.adapter1 = nn.ModuleList([Adapter(config) for _ in range(config.num_hidden_layers // 2)])
+        self.adapter2 = nn.ModuleList([Adapter(config) for _ in range(config.num_hidden_layers // 2)])
 
         # Add side block output head.
-        self.adapter_outputs = nn.Linear(config.hidden_size, config.num_labels)
+        self.adapter1_outputs = nn.Linear(config.hidden_size, config.num_labels)
+        self.adapter2_outputs = nn.Linear(config.hidden_size, config.num_labels)
         # Initialize weights and apply final processing
         self.post_init()
 
@@ -116,19 +118,11 @@ class AdaptedRobertaForMultipleTasks(RobertaModel):
         #1logits = self.classifier(sequence_output)
         layer_outputs = outputs[2] # hidden_states
 
+        adapter_states = layer_outputs[0]
+        # Side block forward propagation.
+        for i in range(1, len(layer_outputs), 2):
+            adapter_states = self.adapter[i // 2](adapter_states + layer_outputs[i] + layer_outputs[i + 1])
 
-        # Sum the input and output of each Transformer block
-        transformer_blocks = self.roberta.encoder.layer
-        hidden_states = outputs.hidden_states
-        adapted_sequence = hidden_states[0]  # Initial embeddings as the first input
-
-        for i, layer_module in enumerate(transformer_blocks):
-            layer_outputs = layer_module(adapted_sequence, attention_mask)
-            layer_output = layer_outputs[0]
-            adapted_sequence = hidden_states[i] + layer_output
-
-        # Apply adapter on the summed output
-        adapted_sequence = self.adapter(adapted_sequence)
 
         if config.task_name == "classification":
             pooled_output = adapted_sequence[:, 0, :]  # [CLS] token for classification tasks
@@ -137,14 +131,15 @@ class AdaptedRobertaForMultipleTasks(RobertaModel):
         elif config.task_name == "ner":
             logits = self.ner_head(adapted_sequence)
             return TokenClassifierOutput(logits=logits)
-        elif config.task_name == "qa":
+        else:
+            raise ValueError('need to specify config.task_name')
+        '''elif config.task_name == "qa":
             logits = self.qa_head(adapted_sequence)
             start_logits, end_logits = logits.split(1, dim=-1)
             start_logits = start_logits.squeeze(-1)
             end_logits = end_logits.squeeze(-1)
-            return QuestionAnsweringModelOutput(start_logits=start_logits, end_logits=end_logits)
-        else:
-            raise ValueError('need to specify config.task_name')
+            return QuestionAnsweringModelOutput(start_logits=start_logits, end_logits=end_logits)'''
+        
 
 
 # Example usage
