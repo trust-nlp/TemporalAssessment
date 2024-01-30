@@ -4,9 +4,9 @@ GPU_NUMBER="0,1"
 RUN_FILE='/home/weisi/TemporalAssessment/baselines/ner.py'
 BASE_PATH='/home/weisi/TemporalAssessment/data/GMB'
 MODEL_NAME='bert-base-cased' # bert-base-uncased  roberta-base
-BATCH_SIZE=32
+BATCH_SIZE=16
 ACCUMULATION_STEPS=2
-SPLITSEED=1
+SPLITSEED=5
 TASK='GmbNER'
 #sh /home/weisi/TemporalAssessment/scripts/gmb_run_all.sh
 # 4 time periods 'gmb-T1_2004_2005 T2_2006_2007 T3_2008_2009 T4_2010_2011 AY_2004_2009
