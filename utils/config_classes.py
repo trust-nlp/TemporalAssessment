@@ -153,15 +153,22 @@ class DataTrainingArguments:
     ) #  defalt was False for NER TASK in baselines
     
     #-------------------Classification and NER------------------
-    text_column_name: Optional[str] = field(
+    text_column_names: Optional[str] = field(
         default=None,
         metadata={
             "help": (
                 "The name of the text column in the input dataset or a CSV/JSON file. "
-                'If not specified, will use the "sentence" column for single/multi-label classifcation/NER task.'
+                'If not specified, will use the "sentence" column for single/multi-label classifcation task.'
             )
         },
-    )
+    ) #classification
+    text_column_name: Optional[str] = field(
+        default=None, 
+        metadata={
+            "help": (
+                'The column name of text to input in the file (a csv or JSON file).'
+                'If not specified, will use the tokens')}
+    ) #ner
     label_column_name: Optional[str] = field(
         default=None,
         metadata={
