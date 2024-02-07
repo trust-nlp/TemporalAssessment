@@ -180,9 +180,7 @@ def main():
             
         for key in data_files.keys():
             logger.info(f"load a local file for {key}: {data_files[key]}")
-
-    # See more about loading any type of standard or custom dataset at
-    # https://huggingface.co/docs/datasets/loading_datasets.
+    
 
     if data_args.remove_splits is not None:
         for split in data_args.remove_splits.split(","):
