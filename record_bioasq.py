@@ -3,10 +3,10 @@ import os
 import pandas as pd
 
 # paths
-base_dir = '/home/weisi/TemporalAssessment/logs/BioASQ_list_ideal'
+base_dir = '/home/weisi/TemporalAssessment/logs/BioASQ_yesno_exact'
 options = ['T1-T1', 'T1-T2', 'T1-T3', 'T1-T4', 'T2-T2', 'T2-T3', 'T2-T4', 'T3-T3', 'T3-T4', 'T4-T4', 'AY-T4']
 file_name = 'predict_results.json'
-out_csv_file_name = 'BioASQ_list_ideal_ans_scores_t5-base_seed1.csv'
+out_csv_file_name = 'BioASQ_yesno_exact_ans_scores_t5-base_seed1.csv'
 
 results = {}
 
@@ -15,7 +15,7 @@ results = {}
 #/home/weisi/TemporalAssessment/logs/BioASQ_factoid_exact/T1_T1/t5-base/split_seed1/model_seed_42_3e-5_maxanslen20
 #/home/weisi/TemporalAssessment/logs/BioASQ_factoid_ideal/T1_T1/t5-base/split_seed1/b4a1_sd42_3e-4_maxanslen20
 for option in options:
-    file_path = os.path.join(base_dir, option.replace('-', '_'), 't5-base', 'split_seed1','b4a1_sd42_3e-4_maxanslen20', file_name)
+    file_path = os.path.join(base_dir,  't5-base', option.replace('-', '_'),'split_seed1','b4a1_sd42_3e-4_maxanslen20', file_name)
     if os.path.exists(file_path):
         with open(file_path, 'r') as file:
             data = json.load(file)

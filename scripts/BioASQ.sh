@@ -5,15 +5,15 @@ MODEL_NAME='t5-base' #'razent/SciFive-base-Pubmed_PMC' 't5-base'
 BATCH_SIZE=4 #32?
 ACCUMULATION_STEPS=1
 SPLITSEED=1
-QUES_TYPE='list'
-ANS_COL='ideal_answer'
-TASK='BioASQ_list_ideal'
+QUES_TYPE='yesno'
+ANS_COL='exact_answer'
+TASK='BioASQ_yesno_exact'
 
 #AY-T4 T1-T1 T1-T2 T1-T3 T1-T4 T2-T2 T2-T3 T2-T4 T3-T3 T3-T4 T4-T4 
 # T1_2013-2015 T2_2016_2018 T3_2019_2020 T4_2021_2022 AY_2013_2020
 
 CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MODEL_NAME} --seed 42\
-    --output_dir logs/${TASK}/AY_T4/${MODEL_NAME}/split_seed${SPLITSEED}/b4a1_sd42_3e-4_maxanslen20\
+    --output_dir logs/${TASK}/${MODEL_NAME}/AY_T4/split_seed${SPLITSEED}/b4a1_sd42_3e-4_maxanslen20\
     --overwrite_output_dir \
     --train_file "$BASE_PATH/$QUES_TYPE/seed$SPLITSEED/bioasq-$QUES_TYPE-AY_2013_2020-train.json"\
     --validation_file  "$BASE_PATH/$QUES_TYPE/seed$SPLITSEED/bioasq-$QUES_TYPE-AY_2013_2020-validation.json"\
@@ -24,7 +24,7 @@ CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MOD
 
 
 CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MODEL_NAME} --seed 42\
-    --output_dir logs/${TASK}/T1_T1/${MODEL_NAME}/split_seed${SPLITSEED}/b4a1_sd42_3e-4_maxanslen20\
+    --output_dir logs/${TASK}/${MODEL_NAME}/T1_T1/split_seed${SPLITSEED}/b4a1_sd42_3e-4_maxanslen20\
     --overwrite_output_dir \
     --train_file "$BASE_PATH/$QUES_TYPE/seed$SPLITSEED/bioasq-$QUES_TYPE-T1_2013_2015-train.json"\
     --validation_file  "$BASE_PATH/$QUES_TYPE/seed$SPLITSEED/bioasq-$QUES_TYPE-T1_2013_2015-validation.json"\
@@ -35,7 +35,7 @@ CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MOD
 
 
 CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MODEL_NAME} --seed 42\
-    --output_dir logs/${TASK}/T1_T2/${MODEL_NAME}/split_seed${SPLITSEED}/b4a1_sd42_3e-4_maxanslen20\
+    --output_dir logs/${TASK}/${MODEL_NAME}/T1_T2/split_seed${SPLITSEED}/b4a1_sd42_3e-4_maxanslen20\
     --overwrite_output_dir \
     --train_file "$BASE_PATH/$QUES_TYPE/seed$SPLITSEED/bioasq-$QUES_TYPE-T1_2013_2015-train.json"\
     --validation_file  "$BASE_PATH/$QUES_TYPE/seed$SPLITSEED/bioasq-$QUES_TYPE-T1_2013_2015-validation.json"\
@@ -45,7 +45,7 @@ CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MOD
     --per_device_train_batch_size ${BATCH_SIZE} --per_device_eval_batch_size ${BATCH_SIZE} --gradient_accumulation_steps ${ACCUMULATION_STEPS} --eval_accumulation_steps ${ACCUMULATION_STEPS}
 
 CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MODEL_NAME} --seed 42\
-    --output_dir logs/${TASK}/T1_T3/${MODEL_NAME}/split_seed${SPLITSEED}/b4a1_sd42_3e-4_maxanslen20\
+    --output_dir logs/${TASK}/${MODEL_NAME}/T1_T3/split_seed${SPLITSEED}/b4a1_sd42_3e-4_maxanslen20\
     --overwrite_output_dir \
     --train_file "$BASE_PATH/$QUES_TYPE/seed$SPLITSEED/bioasq-$QUES_TYPE-T1_2013_2015-train.json"\
     --validation_file  "$BASE_PATH/$QUES_TYPE/seed$SPLITSEED/bioasq-$QUES_TYPE-T1_2013_2015-validation.json"\
@@ -55,7 +55,7 @@ CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MOD
     --per_device_train_batch_size ${BATCH_SIZE} --per_device_eval_batch_size ${BATCH_SIZE} --gradient_accumulation_steps ${ACCUMULATION_STEPS} --eval_accumulation_steps ${ACCUMULATION_STEPS}
 
 CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MODEL_NAME} --seed 42\
-    --output_dir logs/${TASK}/T1_T4/${MODEL_NAME}/split_seed${SPLITSEED}/b4a1_sd42_3e-4_maxanslen20\
+    --output_dir logs/${TASK}/${MODEL_NAME}/T1_T4/split_seed${SPLITSEED}/b4a1_sd42_3e-4_maxanslen20\
     --overwrite_output_dir \
     --train_file "$BASE_PATH/$QUES_TYPE/seed$SPLITSEED/bioasq-$QUES_TYPE-T1_2013_2015-train.json"\
     --validation_file  "$BASE_PATH/$QUES_TYPE/seed$SPLITSEED/bioasq-$QUES_TYPE-T1_2013_2015-validation.json"\
@@ -65,7 +65,7 @@ CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MOD
     --per_device_train_batch_size ${BATCH_SIZE} --per_device_eval_batch_size ${BATCH_SIZE} --gradient_accumulation_steps ${ACCUMULATION_STEPS} --eval_accumulation_steps ${ACCUMULATION_STEPS}
 
 CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MODEL_NAME} --seed 42\
-    --output_dir logs/${TASK}/T2_T2/${MODEL_NAME}/split_seed${SPLITSEED}/b4a1_sd42_3e-4_maxanslen20\
+    --output_dir logs/${TASK}/${MODEL_NAME}/T2_T2/split_seed${SPLITSEED}/b4a1_sd42_3e-4_maxanslen20\
     --overwrite_output_dir \
     --train_file "$BASE_PATH/$QUES_TYPE/seed$SPLITSEED/bioasq-$QUES_TYPE-T2_2016_2018-train.json"\
     --validation_file  "$BASE_PATH/$QUES_TYPE/seed$SPLITSEED/bioasq-$QUES_TYPE-T2_2016_2018-validation.json"\
@@ -75,7 +75,7 @@ CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MOD
     --per_device_train_batch_size ${BATCH_SIZE} --per_device_eval_batch_size ${BATCH_SIZE} --gradient_accumulation_steps ${ACCUMULATION_STEPS} --eval_accumulation_steps ${ACCUMULATION_STEPS}
 
 CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MODEL_NAME} --seed 42\
-    --output_dir logs/${TASK}/T2_T3/${MODEL_NAME}/split_seed${SPLITSEED}/b4a1_sd42_3e-4_maxanslen20\
+    --output_dir logs/${TASK}/${MODEL_NAME}/T2_T3/split_seed${SPLITSEED}/b4a1_sd42_3e-4_maxanslen20\
     --overwrite_output_dir \
     --train_file "$BASE_PATH/$QUES_TYPE/seed$SPLITSEED/bioasq-$QUES_TYPE-T2_2016_2018-train.json"\
     --validation_file  "$BASE_PATH/$QUES_TYPE/seed$SPLITSEED/bioasq-$QUES_TYPE-T2_2016_2018-validation.json"\
@@ -85,7 +85,7 @@ CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MOD
     --per_device_train_batch_size ${BATCH_SIZE} --per_device_eval_batch_size ${BATCH_SIZE} --gradient_accumulation_steps ${ACCUMULATION_STEPS} --eval_accumulation_steps ${ACCUMULATION_STEPS}
 
 CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MODEL_NAME} --seed 42\
-    --output_dir logs/${TASK}/T2_T4/${MODEL_NAME}/split_seed${SPLITSEED}/b4a1_sd42_3e-4_maxanslen20\
+    --output_dir logs/${TASK}/${MODEL_NAME}/T2_T4/split_seed${SPLITSEED}/b4a1_sd42_3e-4_maxanslen20\
     --overwrite_output_dir \
     --train_file "$BASE_PATH/$QUES_TYPE/seed$SPLITSEED/bioasq-$QUES_TYPE-T2_2016_2018-train.json"\
     --validation_file  "$BASE_PATH/$QUES_TYPE/seed$SPLITSEED/bioasq-$QUES_TYPE-T2_2016_2018-validation.json"\
@@ -95,7 +95,7 @@ CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MOD
     --per_device_train_batch_size ${BATCH_SIZE} --per_device_eval_batch_size ${BATCH_SIZE} --gradient_accumulation_steps ${ACCUMULATION_STEPS} --eval_accumulation_steps ${ACCUMULATION_STEPS}
 
 CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MODEL_NAME} --seed 42\
-    --output_dir logs/${TASK}/T3_T3/${MODEL_NAME}/split_seed${SPLITSEED}/b4a1_sd42_3e-4_maxanslen20\
+    --output_dir logs/${TASK}/${MODEL_NAME}/T3_T3/split_seed${SPLITSEED}/b4a1_sd42_3e-4_maxanslen20\
     --overwrite_output_dir \
     --train_file "$BASE_PATH/$QUES_TYPE/seed$SPLITSEED/bioasq-$QUES_TYPE-T3_2019_2020-train.json"\
     --validation_file  "$BASE_PATH/$QUES_TYPE/seed$SPLITSEED/bioasq-$QUES_TYPE-T3_2019_2020-validation.json"\
@@ -105,7 +105,7 @@ CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MOD
     --per_device_train_batch_size ${BATCH_SIZE} --per_device_eval_batch_size ${BATCH_SIZE} --gradient_accumulation_steps ${ACCUMULATION_STEPS} --eval_accumulation_steps ${ACCUMULATION_STEPS}
 
 CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MODEL_NAME} --seed 42\
-    --output_dir logs/${TASK}/T3_T4/${MODEL_NAME}/split_seed${SPLITSEED}/b4a1_sd42_3e-4_maxanslen20\
+    --output_dir logs/${TASK}/${MODEL_NAME}/T3_T4/split_seed${SPLITSEED}/b4a1_sd42_3e-4_maxanslen20\
     --overwrite_output_dir \
     --train_file "$BASE_PATH/$QUES_TYPE/seed$SPLITSEED/bioasq-$QUES_TYPE-T3_2019_2020-train.json"\
     --validation_file  "$BASE_PATH/$QUES_TYPE/seed$SPLITSEED/bioasq-$QUES_TYPE-T3_2019_2020-validation.json"\
@@ -115,7 +115,7 @@ CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MOD
     --per_device_train_batch_size ${BATCH_SIZE} --per_device_eval_batch_size ${BATCH_SIZE} --gradient_accumulation_steps ${ACCUMULATION_STEPS} --eval_accumulation_steps ${ACCUMULATION_STEPS}
 
 CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MODEL_NAME} --seed 42\
-    --output_dir logs/${TASK}/T4_T4/${MODEL_NAME}/split_seed${SPLITSEED}/b4a1_sd42_3e-4_maxanslen20\
+    --output_dir logs/${TASK}/${MODEL_NAME}/T4_T4/split_seed${SPLITSEED}/b4a1_sd42_3e-4_maxanslen20\
     --overwrite_output_dir \
     --train_file "$BASE_PATH/$QUES_TYPE/seed$SPLITSEED/bioasq-$QUES_TYPE-T4_2021_2022-train.json"\
     --validation_file  "$BASE_PATH/$QUES_TYPE/seed$SPLITSEED/bioasq-$QUES_TYPE-T4_2021_2022-validation.json"\

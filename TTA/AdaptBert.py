@@ -52,11 +52,12 @@ class AdaptedBertForSequenceClassification(BertPreTrainedModel):
         self.adapter = Adapter(config)  #this is only one adapter.
         # Add adapters. 2 adapters
         self.adapter1 = nn.ModuleList([Adapter(config) for _ in range(config.num_hidden_layers // 2)])
-        self.adapter2 = nn.ModuleList([Adapter(config) for _ in range(config.num_hidden_layers // 2)])
+        #self.adapter2 = nn.ModuleList([Adapter(config) for _ in range(config.num_hidden_layers // 2)])
 
         # Add side block output head.
         self.adapter1_outputs = nn.Linear(config.hidden_size, config.num_labels)
-        self.adapter2_outputs = nn.Linear(config.hidden_size, config.num_labels)
+        #self.adapter2_outputs = nn.Linear(config.hidden_size, config.num_labels)
+
         # Initialize weights and apply final processing
         self.post_init()
 
@@ -103,7 +104,7 @@ class AdaptedBertForSequenceClassification(BertPreTrainedModel):
 
         pooled_output = outputs[1]
         pooled_output = self.dropout(pooled_output)
-        logits = self.classifier(pooled_output)
+        source_logits = self.classifier(pooled_output)
         loss = None
 
         layer_outputs = outputs[2]
@@ -114,13 +115,13 @@ class AdaptedBertForSequenceClassification(BertPreTrainedModel):
             adapter1_states = self.adapter1[i // 2](adapter1_states + layer_outputs[i] + layer_outputs[i + 1])
         adapter1_logits = self.adapter1_outputs(adapter1_states) #size=[batch_size, num_labels]?
 
-        for i in range(0, len(layer_outputs)-1, 2):
+        '''for i in range(0, len(layer_outputs)-1, 2):
             adapter1_states = self.adapter1[i // 2](adapter1_states + layer_outputs[i] + layer_outputs[i + 1])
-        adapter2_logits = self.adapter2_outputs(adapter2_states)
-        ada_logits=
-        ada_loss==entropy(ada_logits).mean()
-        adapter1kl=kl()
-
+        adapter2_logits = self.adapter2_outputs(adapter2_states)'''
+        adapter_logits=adapter1_logits
+        adapter_loss=entropy(adapter_logits).mean()
+        adapter_kl=kl(adapter_logits,source_logits).mean()  
+        Combined_loss=adapter_kl+adapter_loss
 
         if labels is not None:
             if self.config.problem_type is None:
@@ -130,7 +131,7 @@ class AdaptedBertForSequenceClassification(BertPreTrainedModel):
                     self.config.problem_type = "single_label_classification"
                 else:
                     self.config.problem_type = "multi_label_classification"
-
+        # Compute loss for warmup, only for the adapters
             if self.config.problem_type == "regression":
                 loss_fct = MSELoss()
                 if self.num_labels == 1:
@@ -145,12 +146,13 @@ class AdaptedBertForSequenceClassification(BertPreTrainedModel):
                 loss = loss_fct(logits, labels)
 
         
+
         if not return_dict:
             output = (logits,) + outputs[2:]
             return ((loss,) + output) if loss is not None else output
 
         return SequenceClassifierOutput(
-            loss=loss,
+            loss=Combined_loss,
             logits=logits,
             hidden_states=outputs.hidden_states,
             attentions=outputs.attentions,
