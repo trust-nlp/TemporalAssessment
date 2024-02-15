@@ -4,7 +4,7 @@ MODEL_NAME='bert-base-uncased'  #bluebert 'bionlp/bluebert_pubmed_mimic_uncased_
 TASK='Mimic'
 BATCH_SIZE=32
 ACCUMULATION_STEPS=2
-SPLITSEED=5
+SPLITSEED=1
 RUN_FILE='/home/weisi/TemporalAssessment/baselines/classification.py'
 BASE_PATH='/home/weisi/TemporalAssessment/data/MIMIC-IV-Note'
 #mimic-T1_2008_2010  mimic-T2_2011_2013  T3_2014_2016  T4_2017_2019  AY_2008_2016

@@ -7,6 +7,8 @@ from sklearn.model_selection import train_test_split
 with open('/home/weisi/TemporalAssessment/data/MIMIC-IV-Note/mimic-top50.json', 'r', encoding='utf-8') as f:
     df=pd.read_json(f,lines=True)
 
+# save selected columns
+df = df[['uid', 'did', 'time', 'text', 'label']]
 
 folder_path = '/home/weisi/TemporalAssessment/data/MIMIC-IV-Note'
 if not os.path.exists(folder_path):
