@@ -26,7 +26,7 @@ def split_and_save_datasets(df,period,seed,folder_path):
     validation.to_json(os.path.join(folder_path, validation_filename), orient='records', lines=True)
     test.to_json(os.path.join(folder_path, test_filename), orient='records', lines=True)
 
-for seed in range(1, 2):  # range(1,6):randomly split 5 times
+for seed in range(1, 6):  # range(1,6):randomly split 5 times
     folder_path ='/home/weisi/TemporalAssessment/data/BIOASQ/list/seed{}/'.format(seed)
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)

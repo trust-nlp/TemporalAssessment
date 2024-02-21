@@ -24,13 +24,13 @@ def read_and_convert_files(directory, filename, output_directory):
             tokens, ner_tags = [], []
             for line in file:
                 line = line.strip()
-                # 如果遇到空行，则视为句子结束
+                # a blank line is the end of last sentence
                 if not line:
-                    # 只有在tokens不为空时才添加到data，避免添加空句子
+                    # avoid adding empty token:
                     if tokens:
                         data.append({"tokens": tokens, "ner_tags": ner_tags})
-                        tokens, ner_tags = [], []  # 重置为下一句做准备
-                    continue  # 继续处理下一行
+                        tokens, ner_tags = [], []  
+                    continue  # next line
 
                 parts = line.split('\t')
                 if len(parts) == 2:
@@ -38,7 +38,7 @@ def read_and_convert_files(directory, filename, output_directory):
                     tokens.append(token)
                     ner_tags.append(tag)
 
-            # 处理文件中的最后一个句子（如果文件不是以空行结束）
+            # last sentence
             if tokens:
                 data.append({"tokens": tokens, "ner_tags": ner_tags})
 
@@ -71,8 +71,8 @@ read_and_convert_files(directory,'BioNLP09-IOBES', output_directory)
 read_and_convert_files(directory,'BioNLP11EPI-IOB', output_directory)
 read_and_convert_files(directory,'BioNLP11EPI-IOBES', output_directory)
 
-read_and_convert_files(directory,'BioNLP11ID-ggp-IOB', output_directory)
-read_and_convert_files(directory,'BioNLP11ID-ggp-IOBES', output_directory)
+read_and_convert_files(directory,'BioNLP11ID-IOB', output_directory)
+read_and_convert_files(directory,'BioNLP11ID-IOBES', output_directory)
 
 read_and_convert_files(directory,'BioNLP13GE-IOB', output_directory)
 read_and_convert_files(directory,'BioNLP13GE-IOBES', output_directory)

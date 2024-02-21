@@ -4,11 +4,12 @@ import json
 import numpy as np
 import scipy.stats as stats
 
-Task='WiespNER'
+Task='BioNER_Protein_IOBES'#'WiespNER'
 base_path = "/home/weisi/TemporalAssessment/logs"
-options = ['T1_T1', 'T1_T2', 'T1_T3', 'T1_T4', 'T2_T2', 'T2_T3', 'T2_T4', 'T3_T3', 'T3_T4', 'T4_T4', 'AY_T4']
+#options = ['T1_T1', 'T1_T2', 'T1_T3', 'T1_T4', 'T2_T2', 'T2_T3', 'T2_T4', 'T3_T3', 'T3_T4', 'T4_T4', 'AY_T4']
+options = ['D1-D1', 'D1-D2', 'D1-D3', 'D1-D4', 'D2-D1','D2-D2', 'D2-D3', 'D2-D4',  'D3-D1', 'D3-D2','D3-D3', 'D3-D4','D4-D1','D4-D2','D4-D3', 'D4-D4']
 model_name = 'bert-base-cased'
-seeds = range(1, 6)
+seeds = range(1, 5)
 
 keys = [
     "predict_accuracy", "predict_loss", "predict_macro_f1",
@@ -23,7 +24,7 @@ all_results = {option: {key: [] for key in keys} for option in options}
 # calculate mean and 95%CI for each key
 for option in options:
     for seed in seeds:
-        file_path = os.path.join(base_path,Task, option, model_name, f"split_seed{seed}", "model_seed_42_3e-5", "predict_results.json")
+        file_path = os.path.join(base_path,Task, option.replace('-', '_'), model_name, f"split_seed{seed}", "model_seed_42_3e-5_20epc", "predict_results.json")
         with open(file_path, 'r') as file:
             data = json.load(file)
             for key in keys:
@@ -41,7 +42,7 @@ for option, results in all_results.items():
 
 df_results = pd.DataFrame(summary_results).T
 
-csv_file_path =os.path.join(base_path,Task,f"{model_name}_summary_results.csv")
+csv_file_path =os.path.join(base_path,Task,f"{model_name}_summary_results_seed1-4.csv")
 df_results.to_csv(csv_file_path)
 
  
