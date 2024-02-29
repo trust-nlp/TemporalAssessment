@@ -641,21 +641,33 @@ def main():
     #metric_bleurt = evaluate.load("bleurt", module_type="metric")  #bleurt is too memory consuming
     metric_exact_match = evaluate.load("exact_match")
     metric_rouge = evaluate.load('rouge')
+    metric_meteor=evaluate.load('meteor')
 
     def compute_metrics(p: EvalPrediction):
         #bleurt=metric_bleurt.compute(predictions=p.predictions, references=p.label_ids["default"])
-        #print("p.label_ids default",p.label_ids["default"])
-        #print("p.label_ids bleu",p.label_ids["bleu"])
-        bleu=metric_bleu.compute(predictions=p.predictions, references=p.label_ids["bleu"])
+        '''print("p.label_ids default",p.label_ids["default"],"\n")
+        print("p.label_ids rouge",p.label_ids["rouge"])
+        print("p.label_ids bleu",p.label_ids["bleu"])'''
+        # made an mistake, bleu should also use rouge, since our prediction is predictions = ["hello there general kenobi","foo bar foobar"] type 
+        '''references = [
+     [["hello there general kenobi"], ["hello there!"]],
+     [["foo bar foobar"]]
+ ] this is bleu type reference but it should work with predictions = [
+     ["hello there general kenobi",
+    ["foo bar foobar"]
+]'''
+        bleu=metric_bleu.compute(predictions=p.predictions, references=p.label_ids["rouge"])
         exact_match=metric_exact_match.compute(predictions=p.predictions, references=p.label_ids["default"])
-        google_bleu =metric_google_bleu.compute(predictions=p.predictions, references=p.label_ids["bleu"])
+        google_bleu =metric_google_bleu.compute(predictions=p.predictions, references=p.label_ids["rouge"])
         rouge=metric_rouge.compute(predictions=p.predictions, references=p.label_ids["rouge"])
+        meteor=metric_meteor.compute(predictions=p.predictions, references=p.label_ids["rouge"])
         result = {
                 #"bleurt":bleurt,
                 "bleu":bleu,
                 "google_bleu":google_bleu,
                 "exact_match":exact_match,
-                "rouge":rouge
+                "rouge":rouge,
+                "meteor":meteor
             }
         return result
 
@@ -709,12 +721,12 @@ def main():
             '''
         ###############
         references = {
-                "default": [ex[answer_column][0]  for ex in examples],  # Default format, Exact match,bleurt, rouge...
+                "default": [ex[answer_column][0]  for ex in examples],  # Default format is for Exact match,
                 "bleu": [[[item] for item in ex[answer_column]] for ex in examples], # BLEU and Google_bleu format
                 "rouge":[ex[answer_column] for ex in examples]
             }
             
-        print('****** post_processing_function refernce:' ,references,len(references))
+        #print('****** post_processing_function refernce:' ,references,len(references))
         
         return EvalPrediction(predictions=predictions, label_ids=references)
 
