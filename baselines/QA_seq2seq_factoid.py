@@ -644,8 +644,9 @@ def main():
 
     def compute_metrics(p: EvalPrediction):
         #bleurt=metric_bleurt.compute(predictions=p.predictions, references=p.label_ids["default"])
-        #print("p.label_ids default",p.label_ids["default"])
-        #print("p.label_ids bleu",p.label_ids["bleu"])
+        print("p.label_ids default",p.label_ids["default"],"\n")
+
+        print("p.label_ids bleu",p.label_ids["bleu"])
         bleu=metric_bleu.compute(predictions=p.predictions, references=p.label_ids["bleu"])
         exact_match=metric_exact_match.compute(predictions=p.predictions, references=p.label_ids["default"])
         google_bleu =metric_google_bleu.compute(predictions=p.predictions, references=p.label_ids["bleu"])
@@ -787,6 +788,7 @@ def main():
         trainer.save_metrics("predict", metrics)
 
     predictions = results.predictions
+    print("predictions",predictions)
     #decoded_predictions = tokenizer.batch_decode(predictions, skip_special_tokens=True)
     output_predict_file = os.path.join(training_args.output_dir, "predict_results.txt")
     if trainer.is_world_process_zero():
