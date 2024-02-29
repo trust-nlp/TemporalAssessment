@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import pandas as pd
 
 '''def is_sentence_end(prev_token, token, next_token):
     if token in {'!', '?'}:
@@ -76,3 +77,38 @@ read_and_convert_files(directory,'BioNLP11ID-IOBES', output_directory)
 
 read_and_convert_files(directory,'BioNLP13GE-IOB', output_directory)
 read_and_convert_files(directory,'BioNLP13GE-IOBES', output_directory)
+
+
+basepath = '/home/weisi/TemporalAssessment/data/BioNER/Protein'
+prefixes = [
+    'BioNLP09-IOBES',
+    'BioNLP11EPI-IOBES',
+    'BioNLP11ID-IOBES',
+    'BioNLP13GE-IOBES'
+]
+
+dataframes = [] 
+
+for prefix in prefixes:
+    domain = prefix.split('-')[0]  
+    filepath = os.path.join(basepath, f"{prefix}.json") 
+    print(prefix)
+    data=[]
+    with open(filepath, 'r') as file:
+        for line in file:
+            data.append(json.loads(line))
+        #data = json.load(file)
+    
+    
+    for item in data:
+        
+        item['text'] = ' '.join(item['tokens'])  # 将 tokens TO string
+        item['domain'] = domain  # add domain 
+    
+    df = pd.DataFrame(data)
+    dataframes.append(df)
+
+merged_df = pd.concat(dataframes, ignore_index=True)
+
+output_filepath = os.path.join(basepath, "BIONER-IOBES.json")
+merged_df.to_json(output_filepath, orient='records', lines=True)
