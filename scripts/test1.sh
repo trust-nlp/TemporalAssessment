@@ -1,19 +1,25 @@
 GPU_NUMBER="0,1" #"0,1"
-RUN_FILE='/home/weisi/TemporalAssessment/baselines/QA_seq2seq_BioASQ.py' #ideal ans of all question type can use _factoid.py the difference is in exact ans
+RUN_FILE='/home/weisi/TemporalAssessment/baselines/QA_seq2seq_BioASQ.py' 
 BASE_PATH='/home/weisi/TemporalAssessment/data/BIOASQ_formatted'
-MODEL_NAME='t5-base' #'razent/SciFive-base-Pubmed_PMC' 't5-base'
+MODEL_NAME='t5-large' #'razent/SciFive-base-Pubmed_PMC' 't5-base'
 BATCH_SIZE=4 #32?
 ACCUMULATION_STEPS=1
-#SPLITSEED=1
-QUES_TYPE='factoid'   #'yesno'
+#SPLITSEED=1 
+QUES_TYPE='alltypes'  #'yesno'1 'list'new1 record 'factoid'new1 'summary'new1 alltypes
 ANS_COL='exact_answer'
-TASK='BioASQ_factoid_exact'
+TASK='BioASQ_alltypes_exact'
 
+#AY-T4 T1-T1 T1-T2 T1-T3 T1-T4 T2-T2 T2-T3 T2-T4 T3-T3 T3-T4 T4-T4 
+# T1_2013_2015 T2_2016_2018 T3_2019_2020 T4_2021_2022 AY_2013_2020
+#b4a1:batchsize4 accumulation 
+#ALL: T1-T4
+#AY: T1-T3
+#in previous experiments, exact ans are not changed to right format for list summary and yesno question 
 CUDA_VISIBLE_DEVICES=${GPU_NUMBER} python ${RUN_FILE} --model_name_or_path ${MODEL_NAME} --seed 42\
-    --output_dir /home/weisi/TemporalAssessment/logs/${TASK}/${MODEL_NAME}/T1_T1/split_seed1/test\
+    --output_dir /HDD16TB/weisi/logs/${TASK}/${MODEL_NAME}/ALL_ALL/split_seed1/b4a1_sd42_3e-4_maxanslen30_20epc\
     --overwrite_output_dir \
-    --train_file "$BASE_PATH/$QUES_TYPE/seed1/bioasq-$QUES_TYPE-T1_2013_2015-train.json"\
-    --test_file  "$BASE_PATH/$QUES_TYPE/seed1/bioasq-$QUES_TYPE-T1_2013_2015-test.json"\
-    --context_column snippets  --question_column body  --answer_column ${ANS_COL} --do_predict \
-    --predict_with_generate --evaluation_strategy no --learning_rate 3e-4 --max_seq_length 384 --max_answer_length 20 --doc_stride 128 --num_train_epochs 0 \
+    --train_file "$BASE_PATH/$QUES_TYPE/seed1/bioasq-$QUES_TYPE-ALL_2013_2022-train.json"\
+    --test_file  "$BASE_PATH/$QUES_TYPE/seed1/bioasq-$QUES_TYPE-ALL_2013_2022-test.json"\
+    --context_column snippets  --question_column body  --answer_column ${ANS_COL} --do_train --do_predict \
+    --predict_with_generate --evaluation_strategy no --save_strategy no  --learning_rate 3e-4 --max_seq_length 512 --max_answer_length 30 --doc_stride 128 --num_train_epochs 2 \
     --per_device_train_batch_size ${BATCH_SIZE} --per_device_eval_batch_size ${BATCH_SIZE} --gradient_accumulation_steps ${ACCUMULATION_STEPS} --eval_accumulation_steps ${ACCUMULATION_STEPS}
