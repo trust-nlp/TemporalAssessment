@@ -816,7 +816,7 @@ def main():
     #decoded_predictions = tokenizer.batch_decode(predictions, skip_special_tokens=True)
     output_predict_file = os.path.join(training_args.output_dir, "predict_results.txt")
     if trainer.is_world_process_zero():
-        with open(output_predict_file, "w") as writer:
+        with open(output_predict_file, "w", encoding='utf-8') as writer:
             logger.info("***** Predict results *****")
             writer.write("index\tquestion\treference\tmodel_prediction\n")
             for index, example in enumerate(predict_examples):
