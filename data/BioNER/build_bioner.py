@@ -86,11 +86,18 @@ prefixes = [
     'BioNLP11ID-IOBES',
     'BioNLP13GE-IOBES'
 ]
+source_to_domain = {
+    'BioNLP09': 'T1',
+    'BioNLP11EPI': 'T2',
+    'BioNLP11ID': 'T3',
+    'BioNLP13GE': 'T4',
+}
+
 
 dataframes = [] 
 
 for prefix in prefixes:
-    domain = prefix.split('-')[0]  
+    source = prefix.split('-')[0]  
     filepath = os.path.join(basepath, f"{prefix}.json") 
     print(prefix)
     data=[]
@@ -98,12 +105,11 @@ for prefix in prefixes:
         for line in file:
             data.append(json.loads(line))
         #data = json.load(file)
-    
-    
+
     for item in data:
-        
-        item['text'] = ' '.join(item['tokens'])  # 将 tokens TO string
-        item['domain'] = domain  # add domain 
+        item['text'] = ' '.join(item['tokens'])  #  tokens TO string
+        item['source'] = source  # add domain 
+        item['domain'] = source_to_domain[source]
     
     df = pd.DataFrame(data)
     dataframes.append(df)
