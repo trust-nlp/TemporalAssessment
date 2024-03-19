@@ -171,3 +171,4 @@ logs/
 *.csv
 *.json
 *.png
+*.pdf

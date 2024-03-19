@@ -1,13 +1,13 @@
 GPU_NUMBER="0,1" #"0,1"
 RUN_FILE='/home/weisi/TemporalAssessment/baselines/QA_seq2seq_BioASQ.py' 
 BASE_PATH='/home/weisi/TemporalAssessment/data/BIOASQ_formatted'
-MODEL_NAME='t5-large' #'razent/SciFive-base-Pubmed_PMC' 't5-base'
+MODEL_NAME='t5-base' #'razent/SciFive-base-Pubmed_PMC' 't5-base' t5-large cost too much time...
 BATCH_SIZE=4 #32?
 ACCUMULATION_STEPS=1
 #SPLITSEED=1 
-QUES_TYPE='alltypes'  #'yesno'1 'list'new1 record 'factoid'new1 'summary'new1 alltypes
+QUES_TYPE='list'  #'yesno'2 'list'new1 record 'factoid'new2 'summary'new2 alltypes2
 ANS_COL='exact_answer'
-TASK='BioASQ_alltypes_exact'
+TASK='BioASQ_list_exact_new'
 
 #AY-T4 T1-T1 T1-T2 T1-T3 T1-T4 T2-T2 T2-T3 T2-T4 T3-T3 T3-T4 T4-T4 
 # T1_2013_2015 T2_2016_2018 T3_2019_2020 T4_2021_2022 AY_2013_2020

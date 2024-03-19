@@ -6,7 +6,7 @@ import scipy.stats as stats
 import math
 
 # paths
-base_dir ='/HDD16TB/weisi/logs/BioASQ_alltypes_exact' #'/HDD16TB/weisi/logs/BioASQ_factoid_exact'#'/HDD16TB/weisi/logs/BioASQ_alltypes_exact'1#
+base_dir ='/HDD16TB/weisi/logs/BioASQ_alltypes_exact_new' #'/HDD16TB/weisi/logs/BioASQ_factoid_exact'#'/HDD16TB/weisi/logs/BioASQ_alltypes_exact'1#
 out_csv_file_name = 'BioASQ_alltypes_exact-t5-base_seed1-5_new.csv'
 options = ['T1-T1', 'T1-T2', 'T1-T3', 'T1-T4', 'T2-T1','T2-T2', 'T2-T3', 'T2-T4', 'T3-T1', 'T3-T2','T3-T3', 'T3-T4','T4-T1','T4-T2','T4-T3', 'T4-T4', 'ALL-ALL']
 #options = ['T1-T1', 'T1-T2', 'T1-T3', 'T1-T4', 'T2-T1','T2-T2', 'T2-T3', 'T2-T4', 'T3-T1', 'T3-T2','T3-T3', 'T3-T4','T4-T1','T4-T2','T4-T3', 'T4-T4', 'AY-T4']
