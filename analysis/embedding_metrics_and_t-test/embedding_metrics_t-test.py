@@ -32,9 +32,9 @@ T-test results:
 for distances: null hypothesis is the mean value of metric_list is equal to 0, which means the distance is not significant)
 '''
 
-'''our method: previous research only use cosine similarity for embedding, 
+'''
  the way we conduct t-test, the concept of base_metric
- and we will have 15*10(10 domain pairs) of data point for each metric and we have 5 seeds of performance table (5*10 Y)
+ we will have 15*10(10 domain pairs) of data point for each metric and we have 5 seeds of performance table (5*10 Y)
 so we can do regression and see the correlation of metrics and performance'''
 import numpy as np
 import os
@@ -45,12 +45,35 @@ from scipy.stats import ttest_1samp, ttest_ind
 from sklearn.metrics.pairwise import paired_distances #cosine_similarity, manhattan_distances
 
 #dataframes:
-bioasq_gtr_t5=pd.read_json('/home/weisi/TemporalAssessment/analysis/embeddings/BioASQ_embedding-gtr-t5-large.json', lines=True)
+'''bioasq_gtr_t5=pd.read_json('/home/weisi/TemporalAssessment/analysis/embeddings/BioASQ_embedding-gtr-t5-large.json', lines=True)
 bioasq_miniLM=pd.read_json('/home/weisi/TemporalAssessment/analysis/embeddings/BioASQ_embedding-all-MiniLM-L6-v2.json', lines=True)
 mimic_miniLM=pd.read_json('/home/weisi/TemporalAssessment/analysis/embeddings/Mimic_embedding-all-MiniLM-L6-v2.json', lines=True)
 bioner_miniLM=pd.read_json('/home/weisi/TemporalAssessment/analysis/embeddings/BioNER_embedding-all-MiniLM-L6-v2.json', lines=True)
 
-df_list = [bioasq_gtr_t5, bioasq_miniLM, mimic_miniLM, bioner_miniLM]
+df_dict = {
+    'bioasq_gtr_t5': bioasq_gtr_t5, 
+    'bioasq_miniLM':bioasq_miniLM,
+    'mimic_miniLM': mimic_miniLM, 
+    'bioner_miniLM': bioner_miniLM
+}'''
+
+bioasq_simcse=pd.read_json('/home/weisi/TemporalAssessment/analysis/embeddings/BioASQ_embedding-SimCSE-sup-unsup.json', lines=True)
+bioner_simcse=pd.read_json('/home/weisi/TemporalAssessment/analysis/embeddings/BioNER_embedding-SimCSE-sup-unsup.json', lines=True)
+mimic_simcse=pd.read_json('/home/weisi/TemporalAssessment/analysis/embeddings/Mimic_embedding-SimCSE-sup-unsup.json', lines=True)
+bioasq_use=pd.read_json('/home/weisi/TemporalAssessment/analysis/embeddings/BioASQ_embedding-USE.json', lines=True)
+bioner_use=pd.read_json('/home/weisi/TemporalAssessment/analysis/embeddings/BioNER_embedding-USE.json', lines=True)
+mimic_use=pd.read_json('/home/weisi/TemporalAssessment/analysis/embeddings/Mimic_embedding-USE.json', lines=True)
+df_simcse_dict = {
+    'bioasq_simcse': bioasq_simcse, 
+    'bioner_simcse':bioner_simcse,
+    'mimic_simcse': mimic_simcse,  
+}
+
+df_use_dict = {
+    'bioasq_use': bioasq_use, 
+    'bioner_use':bioner_use,
+    'mimic_use': mimic_use, 
+}
 domains = ['T1', 'T2', 'T3', 'T4']
 # embeddings: sbert first 512, sbert average sentence/paragragh, or universal sentence embedding(USE), or SimCSE, or average token embedding
 # metrics: cosine, manhattan, Euclidean,
@@ -62,29 +85,29 @@ def compute_average_embedding(df, sample_ratio=0.5):
     average_embedding = np.mean(np.stack(sampled_df['embedding']), axis=0)
     return average_embedding
 
-def compute_base_average_embeddings_list(df, num_iterations=15):
+def compute_base_average_embeddings_list(df, num_iterations=15,embedding_column='embedding'):
     results_half1 = []
     results_half2 = []
     for _ in range(num_iterations):
         sampled_df = df.sample(frac=0.5)
-        average_embedding_half1 = np.mean(np.stack(sampled_df['embedding']), axis=0)
+        average_embedding_half1 = np.mean(np.stack(sampled_df[embedding_column]), axis=0)
         results_half1.append(average_embedding_half1.tolist())
     
         remaining_df = df.drop(sampled_df.index)
-        average_embedding_half2 = np.mean(np.stack(remaining_df['embedding']), axis=0)
+        average_embedding_half2 = np.mean(np.stack(remaining_df[embedding_column]), axis=0)
         results_half2.append(average_embedding_half2.tolist())
     return results_half1, results_half2
 
-def compute_domain_average_embeddings_list(df, domain, num_iterations=15):
+def compute_domain_average_embeddings_list(df, domain, num_iterations=15,embedding_column='embedding'):
     results_half1 = []
     results_half2 = []
     for _ in range(num_iterations):
         sampled_df = df[df['domain'] == domain].sample(frac=0.5)
-        average_embedding_half1 = np.mean(np.stack(sampled_df['embedding']), axis=0)
+        average_embedding_half1 = np.mean(np.stack(sampled_df[embedding_column]), axis=0)
         results_half1.append(average_embedding_half1.tolist())
     
         remaining_df = df[df['domain'] == domain].drop(sampled_df.index)
-        average_embedding_half2 = np.mean(np.stack(remaining_df['embedding']), axis=0)
+        average_embedding_half2 = np.mean(np.stack(remaining_df[embedding_column]), axis=0)
         results_half2.append(average_embedding_half2.tolist())
     return results_half1, results_half2
 
@@ -125,6 +148,7 @@ def conduct_t_tests(metrics, base_metrics):
     return t_test_results
 
 def conduct_t_tests_Welch(metrics, base_metrics):
+    #this is Welch-t-test
     t_test_results = {}
     for metric in metrics.keys():
         t_stat, p_val = ttest_ind(metrics[metric], base_metrics[metric], equal_var=False)
@@ -141,13 +165,12 @@ def conduct_t_tests_Welch(metrics, base_metrics):
 
 
 
-for df_index, df in enumerate(df_list):
+#for df_index, df in enumerate(df_list):
+for df_name, df in df_simcse_dict.items():
     df_results = {}
     df_all_results = {}
-    #df_name = f"DataFrame_{df_index}"
-    #df_results[df_name] = {}
-    
-    base_ave_emb_half1_list, base_ave_emb_half2_list = compute_base_average_embeddings_list(df)
+
+    base_ave_emb_half1_list, base_ave_emb_half2_list = compute_base_average_embeddings_list(df,embedding_column='sup_embedding')
     base_metrics = compute_metric_lists(base_ave_emb_half1_list, base_ave_emb_half2_list)
     
     metrics_avg = {}
@@ -160,8 +183,97 @@ for df_index, df in enumerate(df_list):
     domain_results = {}
     for i, domain1 in enumerate(domains):
         for domain2 in domains[i:]:
-            emb1_half1_list, emb1_half2_list = compute_domain_average_embeddings_list(df, domain1)
-            emb2_half1_list, emb2_half2_list = compute_domain_average_embeddings_list(df, domain2)
+            emb1_half1_list, emb1_half2_list = compute_domain_average_embeddings_list(df, domain1,embedding_column='sup_embedding')
+            emb2_half1_list, emb2_half2_list = compute_domain_average_embeddings_list(df, domain2,embedding_column='sup_embedding')
+            metrics = compute_metric_lists(emb1_half1_list, emb2_half2_list)
+            t_test_results = conduct_t_tests(metrics, base_metrics)
+            metrics_avg = {}
+            for metric, values in metrics.items():
+                metrics_avg[metric] = np.mean(values)
+
+            domain_pair_key = f"{domain1}_{domain2}"
+            df_results[domain_pair_key] = {"metrics": metrics_avg, "t_test_results": t_test_results}
+            df_all_results[domain_pair_key] = {"metrics": metrics}
+
+
+    output_path1 = f'/home/weisi/TemporalAssessment/analysis/embedding_metrics_and_t-test/{df_name}_sup_t-test-results.json'
+    dir_path, filename = os.path.split(output_path1)
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+    with open(output_path1, 'w') as f:
+        json.dump(df_results, f, indent=4)
+    
+    output_path2 = f'/home/weisi/TemporalAssessment/analysis/embedding_metrics_and_t-test/{df_name}_sup_metric_lists.json'
+    dir_path, filename = os.path.split(output_path2)
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+    with open(output_path2, 'w') as f:
+        json.dump(df_all_results, f, indent=4)
+
+print('sup simcse finished')
+
+for df_name, df in df_simcse_dict.items():
+    df_results = {}
+    df_all_results = {}
+
+    base_ave_emb_half1_list, base_ave_emb_half2_list = compute_base_average_embeddings_list(df,embedding_column='unsup_embedding')
+    base_metrics = compute_metric_lists(base_ave_emb_half1_list, base_ave_emb_half2_list)
+    
+    metrics_avg = {}
+    for metric, values in base_metrics.items():
+        metrics_avg[metric] = np.mean(values)
+
+    df_results["base_metrics"] = metrics_avg
+    df_all_results["base_metrics"] = base_metrics
+
+    domain_results = {}
+    for i, domain1 in enumerate(domains):
+        for domain2 in domains[i:]:
+            emb1_half1_list, emb1_half2_list = compute_domain_average_embeddings_list(df, domain1,embedding_column='unsup_embedding')
+            emb2_half1_list, emb2_half2_list = compute_domain_average_embeddings_list(df, domain2,embedding_column='unsup_embedding')
+            metrics = compute_metric_lists(emb1_half1_list, emb2_half2_list)
+            t_test_results = conduct_t_tests(metrics, base_metrics)
+            metrics_avg = {}
+            for metric, values in metrics.items():
+                metrics_avg[metric] = np.mean(values)
+
+            domain_pair_key = f"{domain1}_{domain2}"
+            df_results[domain_pair_key] = {"metrics": metrics_avg, "t_test_results": t_test_results}
+            df_all_results[domain_pair_key] = {"metrics": metrics}
+
+    output_path1 = f'/home/weisi/TemporalAssessment/analysis/embedding_metrics_and_t-test/{df_name}_unsup_t-test-results.json'
+    dir_path, filename = os.path.split(output_path1)
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+    with open(output_path1, 'w') as f:
+        json.dump(df_results, f, indent=4)
+    
+    output_path2 = f'/home/weisi/TemporalAssessment/analysis/embedding_metrics_and_t-test/{df_name}_unsup_metric_lists.json'
+    dir_path, filename = os.path.split(output_path2)
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+    with open(output_path2, 'w') as f:
+        json.dump(df_all_results, f, indent=4)
+
+for df_name, df in df_use_dict.items():
+    df_results = {}
+    df_all_results = {}
+
+    base_ave_emb_half1_list, base_ave_emb_half2_list = compute_base_average_embeddings_list(df,embedding_column='use_embedding')
+    base_metrics = compute_metric_lists(base_ave_emb_half1_list, base_ave_emb_half2_list)
+    
+    metrics_avg = {}
+    for metric, values in base_metrics.items():
+        metrics_avg[metric] = np.mean(values)
+
+    df_results["base_metrics"] = metrics_avg
+    df_all_results["base_metrics"] = base_metrics
+
+    domain_results = {}
+    for i, domain1 in enumerate(domains):
+        for domain2 in domains[i:]:
+            emb1_half1_list, emb1_half2_list = compute_domain_average_embeddings_list(df, domain1,embedding_column='use_embedding')
+            emb2_half1_list, emb2_half2_list = compute_domain_average_embeddings_list(df, domain2,embedding_column='use_embedding')
             metrics = compute_metric_lists(emb1_half1_list, emb2_half2_list)
             t_test_results = conduct_t_tests(metrics, base_metrics)
             metrics_avg = {}
@@ -173,14 +285,14 @@ for df_index, df in enumerate(df_list):
             df_all_results[domain_pair_key] = {"metrics": metrics}
 
     
-    output_path1 = f'/home/weisi/TemporalAssessment/analysis/t-test/{df_index}_t-test-results.json'
+    output_path1 = f'/home/weisi/TemporalAssessment/analysis/embedding_metrics_and_t-test/{df_name}_t-test-results.json'
     dir_path, filename = os.path.split(output_path1)
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
     with open(output_path1, 'w') as f:
         json.dump(df_results, f, indent=4)
     
-    output_path2 = f'/home/weisi/TemporalAssessment/analysis/t-test/{df_index}_metric_lists.json'
+    output_path2 = f'/home/weisi/TemporalAssessment/analysis/embedding_metrics_and_t-test/{df_name}_metric_lists.json'
     dir_path, filename = os.path.split(output_path2)
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
