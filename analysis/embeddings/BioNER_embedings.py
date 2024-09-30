@@ -45,7 +45,7 @@ average_embeddings_path = f'/home/weisi/TemporalAssessment/analysis/BioNER_avera
 
 with open(average_embeddings_path, 'w') as f:
     json.dump(average_embeddings, f)
-
+'''
 # cosine simmilarity for each domain pairs 
 domain_distances = {}
 for i, domain1 in enumerate(domains):
@@ -57,4 +57,4 @@ for i, domain1 in enumerate(domains):
 distances_path = f'/home/weisi/TemporalAssessment/analysis/BioNER_cosine-{model_name}.json'
 
 with open(distances_path, 'w') as f:
-    json.dump(domain_distances, f)
+    json.dump(domain_distances, f)'''

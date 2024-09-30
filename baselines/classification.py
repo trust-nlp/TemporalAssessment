@@ -322,6 +322,7 @@ def main():
     # if do_train is not set, we will use the label infos in the config
     if training_args.do_train and not is_regression:  # classification, training
         label_to_id = {v: i for i, v in enumerate(label_list)}
+        print('NOTICE\n','label_to_id:',label_to_id,'\n','model.config.label2id:',model.config.label2id )
         # update config with label infos
         if model.config.label2id != label_to_id:
             logger.warning(
@@ -331,6 +332,7 @@ def main():
         model.config.label2id = label_to_id
         model.config.id2label = {id: label for label, id in config.label2id.items()}
     elif not is_regression:  # classification, but not training
+        #print('label_to_id:',{v: i for i, v in enumerate(label_list)},'\n','model.config.label2id:',model.config.label2id )
         logger.info("using label infos in the model config")
         logger.info("label2id: {}".format(model.config.label2id))
         label_to_id = model.config.label2id
@@ -457,6 +459,9 @@ def main():
             # Micro F1 is commonly used in multi-label classification
             #result = metric.compute(predictions=preds, references=p.label_ids, average="micro")
             accuracy = accuracy_metric.compute(predictions=preds, references=p.label_ids)["accuracy"]
+            sample_f1 = f1_metric.compute(predictions=preds, references=p.label_ids, average="samples")["f1"]
+            sample_precision = precision_metric.compute(predictions=preds, references=p.label_ids, average="samples")["precision"]
+            sample_recall = recall_metric.compute(predictions=preds, references=p.label_ids, average="samples")["recall"]
             micro_f1 = f1_metric.compute(predictions=preds, references=p.label_ids, average="micro")["f1"]
             micro_precision = precision_metric.compute(predictions=preds, references=p.label_ids, average="micro")["precision"]
             micro_recall = recall_metric.compute(predictions=preds, references=p.label_ids, average="micro")["recall"]
@@ -468,6 +473,9 @@ def main():
             weighted_recall = recall_metric.compute(predictions=preds, references=p.label_ids, average="weighted")["recall"]
             result = {
                 "accuracy": accuracy,
+                "sample_precision": sample_precision,
+                "sample_recall": sample_recall, 
+                "sample_f1": sample_f1,
                 "micro_precision": micro_precision,
                 "micro_recall": micro_recall, 
                 "micro_f1": micro_f1,
@@ -480,28 +488,40 @@ def main():
             }
         else:
             preds = np.argmax(preds, axis=1)
-            accuracy = accuracy_metric.compute(predictions=preds, references=p.label_ids)["accuracy"]
-            micro_f1 = f1_metric.compute(predictions=preds, references=p.label_ids, average="micro")["f1"]
-            micro_precision = precision_metric.compute(predictions=preds, references=p.label_ids, average="micro")["precision"]
-            micro_recall = recall_metric.compute(predictions=preds, references=p.label_ids, average="micro")["recall"]
-            macro_f1 = f1_metric.compute(predictions=preds, references=p.label_ids, average="macro")["f1"]
-            macro_precision = precision_metric.compute(predictions=preds, references=p.label_ids, average="macro")["precision"]
-            macro_recall = recall_metric.compute(predictions=preds, references=p.label_ids, average="macro")["recall"]
-            weighted_f1 = f1_metric.compute(predictions=preds, references=p.label_ids, average="weighted")["f1"]
-            weighted_precision = precision_metric.compute(predictions=preds, references=p.label_ids, average="weighted")["precision"]
-            weighted_recall = recall_metric.compute(predictions=preds, references=p.label_ids, average="weighted")["recall"]
-            result = {
-                "accuracy": accuracy,
-                "micro_precision": micro_precision,
-                "micro_recall": micro_recall, 
-                "micro_f1": micro_f1,
-                "macro_precision": macro_precision,
-                "macro_recall": macro_recall,
-                "macro_f1": macro_f1,
-                "weighted_precision":weighted_precision,
-                "weighted_recall":weighted_recall,
-                "weighted_f1":weighted_f1,
-            }
+            if num_labels == 2:
+                accuracy = accuracy_metric.compute(predictions=preds, references=p.label_ids)["accuracy"]
+                binary_precision = precision_metric.compute(predictions=preds, references=p.label_ids, average="binary")["precision"]
+                binary_recall = recall_metric.compute(predictions=preds, references=p.label_ids, average="binary")["recall"]
+                binary_f1 = f1_metric.compute(predictions=preds, references=p.label_ids, average="binary")["f1"]
+                result = {
+                    "accuracy": accuracy,
+                    "precision": binary_precision,
+                    "recall": binary_recall,
+                    "f1": binary_f1,
+                }
+            else:    
+                accuracy = accuracy_metric.compute(predictions=preds, references=p.label_ids)["accuracy"]
+                micro_f1 = f1_metric.compute(predictions=preds, references=p.label_ids, average="micro")["f1"]
+                micro_precision = precision_metric.compute(predictions=preds, references=p.label_ids, average="micro")["precision"]
+                micro_recall = recall_metric.compute(predictions=preds, references=p.label_ids, average="micro")["recall"]
+                macro_f1 = f1_metric.compute(predictions=preds, references=p.label_ids, average="macro")["f1"]
+                macro_precision = precision_metric.compute(predictions=preds, references=p.label_ids, average="macro")["precision"]
+                macro_recall = recall_metric.compute(predictions=preds, references=p.label_ids, average="macro")["recall"]
+                weighted_f1 = f1_metric.compute(predictions=preds, references=p.label_ids, average="weighted")["f1"]
+                weighted_precision = precision_metric.compute(predictions=preds, references=p.label_ids, average="weighted")["precision"]
+                weighted_recall = recall_metric.compute(predictions=preds, references=p.label_ids, average="weighted")["recall"]
+                result = {
+                    "accuracy": accuracy,
+                    "micro_precision": micro_precision,
+                    "micro_recall": micro_recall, 
+                    "micro_f1": micro_f1,
+                    "macro_precision": macro_precision,
+                    "macro_recall": macro_recall,
+                    "macro_f1": macro_f1,
+                    "weighted_precision":weighted_precision,
+                    "weighted_recall":weighted_recall,
+                    "weighted_f1":weighted_f1,
+                }
         '''if len(result) > 1:
             result["combined_score"] = np.mean(list(result.values())).item()'''
         return result

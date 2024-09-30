@@ -66,7 +66,7 @@ for option, results in all_results.items():
             mean = np.mean(values)
             sem = stats.sem(values)  # Standard error of the mean
             ci = stats.t.interval(0.95, len(values)-1, loc=mean, scale=sem)  # 95% CI
-            summary_results[option][metric] = f"{mean:.2f} ± {ci[1] - mean:.2f}"
+            summary_results[option][metric] = f"{mean *100:.2f} ± {ci[1]*100 - mean*100:.2f}"
 
 # Convert summary to DataFrame
 df_summary = pd.DataFrame(summary_results).T
