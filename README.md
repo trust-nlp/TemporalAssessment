@@ -2,18 +2,30 @@
 The repository of temporal analysis project for the [Time Matters: Examine Temporal Effects on Biomedical Language Models](https://arxiv.org/pdf/2407.17638) in [AMIA 2024 Annual Symposim](https://amia.org/education-events/amia-2024-annual-symposium)
 
 # Table of Contents
- * Data
+ * Environment Setup
+ * Time-varying Biomedical Data
  * Usage
  * Contact and Citation
+
+# Environment Setup
+1. Platform:
+Ubuntu 22.04
+Anaconda, Python 3.10.13
+Linux Kernel: 6.8.0-40-generic
+
+2. Run the following commands to create the environment:
+
+`conda env create -f environment.yml`
+`conda activate tempo0`
 
 # Time-varying Biomedical Data
 
 1. [MIMIC-IV-Notes](https://physionet.org/content/mimic-iv-note/2.2/)
 2. BioNLP Shared Task
-* [BioNLP09 Shared Task (2009ST)](https://www.nactem.ac.uk/GENIA/SharedTask/)
-* [BioNLP11 Epigenetics and Post-translational Modifications (2011EPI)](https://2011.bionlp-st.org)
-* [BioNLP11 Infectious Diseases (2011ID) ](https://2011.bionlp-st.org)
-* [BioNLP13 Genia Event Extraction (2013GE)](http://www.google.com/url?q=http%3A%2F%2F2013.bionlp-st.org%2F&sa=D&sntz=1&usg=AOvVaw0h0ntV1fsdCdPwDGCqGA06)
+      * [BioNLP09 Shared Task (2009ST)](https://www.nactem.ac.uk/GENIA/SharedTask/)
+      * [BioNLP11 Epigenetics and Post-translational Modifications (2011EPI)](https://2011.bionlp-st.org)
+      * [BioNLP11 Infectious Diseases (2011ID) ](https://2011.bionlp-st.org)
+      * [BioNLP13 Genia Event Extraction (2013GE)](http://www.google.com/url?q=http%3A%2F%2F2013.bionlp-st.org%2F&sa=D&sntz=1&usg=AOvVaw0h0ntV1fsdCdPwDGCqGA06)
 3. [BioASQ (task b)](http://participants-area.bioasq.org/datasets/)
 
 ## Overview of the data
@@ -34,14 +46,13 @@ After getting the result, use `python record_[data].py` to get the experiment re
 3. Data shift measuring. under the analysis folder, run `/embeddings/[data]_embedings.py' for each [data]
 4. Statistic analysis of the performance and the data shift:
 
-
-note: replace [data] into actual data_path, processing logits for each data is different so need to specify the [data]
+Note: Replace [data] with the actual data path. Since processing differs for each dataset, ensure to specify the correct [data] and file path.
 
 # Contact and Citation
 
-<wliu9@memphis.edu>
+For any inquiries, feel free to contact the author at: <wliu9@memphis.edu>
 
-
+To cite this work:
 ```
 @misc{liu2024timemattersexaminetemporal,
       title={Time Matters: Examine Temporal Effects on Biomedical Language Models}, 
