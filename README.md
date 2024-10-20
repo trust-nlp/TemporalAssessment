@@ -20,12 +20,12 @@ The repository of temporal analysis project for the [Time Matters: Examine Tempo
 
 | Dataset  | Time Intervals                      | Task                  | Labels                         | Data Size         |
 |----------|-------------------------------------|-----------------------|--------------------------------|-------------------|
-| MIMIC    | 2014 - 2016, 2008 - 2010,           | Phenotype Inference    | Top 50 frequent ICD codes      | 331,794 notes     |
-|          | 2011 - 2013, 2017 - 2019            |                       |                                |                   |
-| BioNLP   | 2009ST, 2011EPI,                    | Information Extraction | IOBES Tags of Protein Entity   | 49,354 entities   |
-|          | 2011ID, 2013GE                      |                       |                                |                   |
-| BioASQ   | 2013-2015, 2016-2018,               | Question Answering     | Gold Standard Answer           | 5,046 QA pairs    |
-|          | 2019-2020, 2021-2023                |                       |                                |                   |
+| MIMIC    | 2014 - 2016, 2008 - 2010,2011 - 2013, 2017 -2019           | Phenotype Inference    | Top 50 frequent ICD codes      | 331,794 notes     |
+|          |             |                       |                                |                   |
+| BioNLP   | 2009ST, 2011EPI, 2011ID,2013GE                     | Information Extraction | IOBES Tags of Protein Entity   | 49,354 entities   |
+|          |                     |                       |                                |                   |
+| BioASQ   | 2013-2015, 2016-2018,  2019-2020,2021-2023               | Question Answering     | Gold Standard Answer           | 5,046 QA pairs    |
+|          |               |                       |                                |                   |
 
 # Usage
 1. Data preprocessing and split: 
