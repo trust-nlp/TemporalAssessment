@@ -167,8 +167,10 @@ cython_debug/
 logs/
 
 #no data
-
 *.csv
 *.json
+#no figure
 *.png
 *.pdf
+#no ipynb
+*.ipynb

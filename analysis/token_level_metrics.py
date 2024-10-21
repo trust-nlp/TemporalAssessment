@@ -174,32 +174,3 @@ for df_name, df in df_dict.items():
     with open(output_path2, 'w') as f:
         json.dump(cosine_similarities_most, f, indent=4)
 
-
-'''
-texts_bioner = bioner['text'].tolist()  # Replace 'text_column_name' with the actual column name
-one_grams,_,tokens = tokenize_and_count_ngrams(texts_bioner)
-# Get the most and least common n-grams
-most_common_tokens = one_grams.most_common(20)
-least_common_tokens = one_grams.most_common()[:-21:-1]
-# Show the results
-print("Most Common N-grams:\n", most_common_tokens)
-print("Least Common N-grams:\n", least_common_tokens)
-'''
-
-
-'''
-# least will fail, need to condider another may if we want to calculate least
-least_frequent_tokens = one_grams.most_common()[:-int(total_tokens * 0.1)-1:-1]
-least_frequent_tokens_set = set([token for token, freq in least_frequent_tokens])
-vectorizer_least = TfidfVectorizer(vocabulary=least_frequent_tokens_set)
-tfidf_vectors_least = {domain: vectorizer_least.fit_transform(domain_texts[domain]).mean(axis=0).A1 for domain in domains}
-cosine_similarities_least = {}
-
-for i, domain1 in enumerate(domains):
-    for domain2 in domains[i:]:
-        # cosine similarity of tfidf of top 10% least frequent tokens will fail,
-        # because the vector has extremly small values and norm will be 0, which casuse nan in sim_least
-        least_vec1=tfidf_vectors_least[domain1]
-        least_vec2=tfidf_vectors_least[domain2]
-        sim_least = np.dot(least_vec1, least_vec2)/(np.linalg.norm(least_vec1)*np.linalg.norm(least_vec2))
-        cosine_similarities_least[domain_pair_key] = sim_least'''

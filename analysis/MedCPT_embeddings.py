@@ -5,8 +5,6 @@ import os
 import torch
 from transformers import AutoTokenizer, AutoModel
 from tqdm import tqdm
-# 打印当前使用的内存百分比
-
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
@@ -38,7 +36,7 @@ def batch_process(texts, batch_size=10):
     return np.array(batched_embeddings)
 
 ############# NER ##############
-'''bioner_path='/home/weisi/TemporalAssessment/data/BioNER/Protein/BIONER-IOBES.json'
+bioner_path='/home/weisi/TemporalAssessment/data/BioNER/Protein/BIONER-IOBES.json'
 df=pd.read_json(bioner_path, lines=True)
 embeddings = batch_process(df['text'].tolist(), batch_size=100)
 df['embedding'] = list(embeddings)
@@ -50,10 +48,9 @@ dir_path, filename = os.path.split(output_path)
 if not os.path.exists(dir_path):
     os.makedirs(dir_path)
 df.to_json(output_path, orient='records', lines=True)
-print('bioner embedding saved')'''
-
+print('bioner embedding saved')
 ########### BioASQ ##########
-'''path='/home/weisi/TemporalAssessment/data/BIOASQ/BioASQ.json'
+path='/home/weisi/TemporalAssessment/data/BIOASQ/BioASQ.json'
 df=pd.read_json(path, lines=True)
 #"id"  "type"  
 #filtered the 2023 data
@@ -83,7 +80,7 @@ dir_path, filename = os.path.split(output_path)
 if not os.path.exists(dir_path):
     os.makedirs(dir_path)
 df_final.to_json(output_path, orient='records', lines=True)
-print('bioasq embedding saved')'''
+print('bioasq embedding saved')
 
 ############  MIMIC ###############
 mimic_path='/home/weisi/TemporalAssessment/data/MIMIC-IV-Note/mimic_final.json'

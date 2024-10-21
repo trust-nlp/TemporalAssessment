@@ -8,7 +8,7 @@ sup_model = SimCSE("princeton-nlp/sup-simcse-bert-base-uncased")
 unsup_model = SimCSE('princeton-nlp/unsup-simcse-bert-base-uncased')
 
 ############# NER ##############
-'''bioner_path='/home/weisi/TemporalAssessment/data/BioNER/Protein/BIONER-IOBES.json'
+bioner_path='/home/weisi/TemporalAssessment/data/BioNER/Protein/BIONER-IOBES.json'
 ner=pd.read_json(bioner_path, lines=True)
 
 ner_sup_embeddings = sup_model.encode(ner['text'].tolist())
@@ -30,7 +30,8 @@ dir_path, filename = os.path.split(output_path)
 if not os.path.exists(dir_path):
     os.makedirs(dir_path)
 ner.to_json(output_path, orient='records', lines=True)
-print('bioner embedding saved')'''
+print('bioner embedding saved')
+
 ########### BioASQ ##########
 path='/home/weisi/TemporalAssessment/data/BIOASQ/BioASQ.json'
 df=pd.read_json(path, lines=True)
@@ -65,6 +66,7 @@ if not os.path.exists(dir_path):
     os.makedirs(dir_path)
 df_final.to_json(output_path, orient='records', lines=True)
 print('bioasq embedding saved')
+
 ############  MIMIC ###############
 mimic_path='/home/weisi/TemporalAssessment/data/MIMIC-IV-Note/mimic-top50.json'
 df=pd.read_json(mimic_path, lines=True)

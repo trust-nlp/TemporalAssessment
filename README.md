@@ -42,10 +42,13 @@ The repository of temporal analysis project for the [Time Matters: Examine Tempo
 1. Data preprocessing and split: 
 After downlading data, go to each data folder and run `python build-[data].py` and `python split-[data].py`.
 2. Test temporal effect: 
-Run `sh [data].sh` to conduct test the performance on all time domain pairs $T_{i}-T_{j}$
+Run `sh [data].sh` to conduct test the performance on all time domain pairs.
 After getting the result, use `python record_[data].py` to get the experiment result summary.
-3. Data shift measuring. under the analysis folder, run `/embeddings/[data]_embedings.py' for each [data]
-4. Statistic analysis of the performance and the data shift:
+3. Data shift measuring:
+* Run `analysis/[encoder]_embedings.py` to get the text embedding for semantic shift evaluation. Here, [encoder] can be selected from general domain encoders like SBERT and USE, or biomedical domain encoders like BioLORD and MedCPT.
+* Run `analysis/token_level_metrics.py` to measure the token-level data shift, using metrics such as TF-IDF cosine similarity and Jaccard similarity.
+4. Statistic analysis of the performance and the data shift.
+Run `analysis/statistic_analysis.py` to explore the relationships between language model performance and data shifts.
 
 Note: Replace [data] with the actual data path. Since processing differs for each dataset, ensure to specify the correct [data] and file path.
 
