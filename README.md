@@ -3,6 +3,9 @@ This repository accompanies the project: [Time Matters: Examine Temporal Effects
 It explores how biomedical language models' performance degrades over time due to shifts in data between training and deployment. The project covers three biomedical tasks, using performance metrics, data drift measurements, and statistical analyses to quantify the temporal effects.
 Results show that time impacts model performance, with varying degrees of degradation across tasks.
 
+<img width="1136" alt="time_matters" src="https://github.com/user-attachments/assets/a8fd501a-bdba-4dcd-b7c8-4110790ddf59">
+
+
 # Table of Contents
  * Environment Setup
  * Time-varying Biomedical Data
