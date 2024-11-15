@@ -1,9 +1,16 @@
-# Time Matters: Examine Temporal Effects on Biomedical Language Models
-This repository accompanies the project: [Time Matters: Examine Temporal Effects on Biomedical Language Models](https://arxiv.org/pdf/2407.17638) presented in [AMIA 2024 Annual Symposim](https://amia.org/education-events/amia-2024-annual-symposium)
-It explores how biomedical language models' performance degrades over time due to shifts in data between training and deployment. The project covers three biomedical tasks, using performance metrics, data drift measurements, and statistical analyses to quantify the temporal effects.
-Results show that time impacts model performance, with varying degrees of degradation across tasks.
 
 <img width="1136" alt="time_matters" src="https://github.com/user-attachments/assets/a8fd501a-bdba-4dcd-b7c8-4110790ddf59">
+
+This repository accompanies the project: [Time Matters: Examine Temporal Effects on Biomedical Language Models](https://arxiv.org/pdf/2407.17638) presented in [AMIA 2024 Annual Symposim](https://amia.org/education-events/amia-2024-annual-symposium)
+
+The project investigates how biomedical language models' performance degrades over time due to shifts in data between training and deployment. It focuses on three key biomedical tasks, employing various data drift measurements, and statistical analyses to quantify the temporal effects and explore the relation between data shift and model performance variation.
+
+
+This study reveals that time impacts model performance, and data shift could serve as an indicator for determining when model updates are necessary.
+The presentation slides are available for viewing: Time_Matters_Slides_AMIA24.pdf
+
+
+
 
 
 # Table of Contents
